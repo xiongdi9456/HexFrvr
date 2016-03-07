@@ -1,6 +1,7 @@
 
 var HelloWorldLayer = cc.Layer.extend({
     sprite:null,
+
     ctor:function () {
         //////////////////////////////
         // 1. super init first
@@ -11,6 +12,7 @@ var HelloWorldLayer = cc.Layer.extend({
         //    you may modify it.
         // ask the window size
         var size = cc.winSize;
+        /*
 
         // add a "close" icon to exit the progress. it's an autorelease object
         var closeItem = new cc.MenuItemImage(
@@ -30,6 +32,7 @@ var HelloWorldLayer = cc.Layer.extend({
         menu.x = 0;
         menu.y = 0;
         this.addChild(menu, 1);
+
 
         /////////////////////////////
         // 3. add your codes below...
@@ -64,6 +67,18 @@ var HelloWorldLayer = cc.Layer.extend({
                 cc.tintTo(2.5,255,125,0)
             )
         );
+
+        */
+
+        var sprite0 = new Block();
+        this.addChild(sprite0, 2);
+        sprite0.attr({
+            x : size.width / 2,
+            y : size.height / 2,
+        });
+
+        cc.log(sprite0.m_sprite.getColor());
+        cc.log(Math.abs(-2));
         return true;
     }
 });
