@@ -77,8 +77,22 @@ var HelloWorldLayer = cc.Layer.extend({
             y : size.height / 2,
         });
 
+        var sprite1 = new Block();
+        this.addChild(sprite1, 2);
+        sprite1.attr({
+            x : size.width / 4,
+            y : size.height / 2,
+        });
+        sprite1.setSpriteColor(cc.color(0, 0, 139, 255));
+
         cc.log(sprite0.m_sprite.getColor());
         cc.log(Math.abs(-2));
+        cc.log(Math.sqrt(3) * 1000);
+        var num = Math.sqrt(3);
+        var result = parseFloat(num.toFixed(3));
+        result *= 10;
+        cc.log("result ==> ", result);
+        cc.log("sqrtResult ==> ", parseFloat((140 * Math.sqrt(3) / 6)).toFixed(3));
         return true;
     }
 });

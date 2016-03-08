@@ -21,11 +21,13 @@ var Block = cc.Node.extend({
 
         this.m_sprite = new cc.Sprite(res.block_png);
         this.addChild(this.m_sprite);
+        //灰色
         this.m_color = cc.color(255, 255, 255, 255);
         this.m_sprite.setColor(this.m_color);
+        this.m_spriteW = this.m_sprite.getContentSize().width;
+        this.m_spriteH = this.m_sprite.getContentSize().height;
 
-        //this.setAnchorPoint(cc.p(0.5, 0.5));
-        cc.log(this.getAnchorPoint());
+        this.setAnchorPoint(cc.p(0.5, 0.5));
         return true;
     },
 
@@ -34,11 +36,21 @@ var Block = cc.Node.extend({
         //先将旧精灵移除
         this.removeFromParent(this.m_sprite);
         this.m_sprite = sprite;
+        //重新设置相关属性
+        this.m_sprite.setColor(this.color);
+        this.m_spriteW = this.m_sprite.getContentSize().width;
+        this.m_spriteH = this.m_sprite.getContentSize().height;
     },
 
     //给精灵设置颜色
     setSpriteColor : function(color){
         this.m_sprite.setColor(color);
         this.m_color = color;
+    },
+
+    //设置行列索引
+    setLRIndex : function(lIndex, rIndex){
+        this.m_lineX = lIndex;
+        this.m_rowY = rIndex;
     }
 });
