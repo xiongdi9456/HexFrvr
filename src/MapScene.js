@@ -19,6 +19,7 @@ var MapLayer = cc.Layer.extend({
         var size = cc.winSize;
         // 创建一个Map
         this.m_map = new Map();
+        this.m_map.init();
         // 创建存储Blocks类实例的数组
         this.m_blocks = new Array();
         // 设置space

@@ -10,10 +10,11 @@ function Map(){
     }
 }
 Map.prototype.init = function(){
-    for(var i = 0; i < Map.mapA.length; ++i)
+    for(var i = 0; i < this.mapA.length; ++i)
     {
-        for(var j = 0; j < Map.mapA[i].length; ++j){
-            Map.mapA[i][j] = gMapTag.empty;
+        for(var j = 0; j < this.mapA[i].length; ++j){
+            this.mapA[i][j] = gMapTag.empty;
         }
     }
+    cc.log("map.init finish");
 }
