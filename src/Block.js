@@ -21,11 +21,12 @@ var Block = cc.Node.extend({
 
         this.m_sprite = new cc.Sprite(res.block_png);
         this.addChild(this.m_sprite);
-        //灰色
         this.m_color = cc.color(255, 255, 255, 255);
         this.m_sprite.setColor(this.m_color);
-        this.m_spriteW = this.m_sprite.getContentSize().width;
-        this.m_spriteH = this.m_sprite.getContentSize().height;
+        var cSize = this.m_sprite.getContentSize();
+        this.setContentSize(cSize);
+        gSpriteW = cSize.width;
+        gSpriteH = cSize.height;
 
         this.setAnchorPoint(cc.p(0.5, 0.5));
         return true;
@@ -38,8 +39,10 @@ var Block = cc.Node.extend({
         this.m_sprite = sprite;
         //重新设置相关属性
         this.m_sprite.setColor(this.color);
-        this.m_spriteW = this.m_sprite.getContentSize().width;
-        this.m_spriteH = this.m_sprite.getContentSize().height;
+        var cSize = this.m_sprite.getContentSize();
+        this.setContentSize(cSize);
+        gSpriteW = cSize.width;
+        gSpriteH = cSize.height;
     },
 
     //给精灵设置颜色

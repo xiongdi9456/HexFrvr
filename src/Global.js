@@ -8,6 +8,9 @@ var gSize = cc.winSize;
 //地图行与列
 gMapLineM = 9;
 gMapRowM = 9;
+//图片大小
+gSpriteW = 0;
+gSpriteH = 0;
 //地图标记
 if(gMapTag = "undefined"){
     //创建一个普通对象
