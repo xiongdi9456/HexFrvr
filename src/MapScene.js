@@ -17,13 +17,14 @@ var MapLayer = cc.LayerColor.extend({
         this._super();
 
         var size = cc.winSize;
+        this.setColor(cc.color(28, 28, 28, 255));
         // 创建一个Map
         this.m_map = new Map();
         this.m_map.init();
         // 创建存储Blocks类实例的数组
         this.m_blocks = new Array();
         // 设置space
-        this.m_space = 3;
+        this.m_space = gSpace;
 
        // 生成一个临时Block类,为了获得它的精灵的组件大小
         var blockT = new Block();
@@ -67,14 +68,4 @@ var MapLayer = cc.LayerColor.extend({
         return true;
     }
 
-});
-
-var MapScene = cc.Scene.extend({
-    onEnter : function(){
-        this._super();
-
-        var layer = new MapLayer();
-        layer.setColor(cc.color(28, 28, 28, 255))
-        this.addChild(layer);
-    }
 });

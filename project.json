@@ -17,6 +17,8 @@
         "src/Map.js",
         "src/MapScene.js",
         "src/ShapeType.js",
+        "src/BlockShapeLayer.js",
+        "src/GameScene.js",
         "src/Test.js"
     ]
 }
