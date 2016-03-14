@@ -15,6 +15,7 @@ var ShapeType = cc.Node.extend({
         this.m_color = color;
         this.m_blocks = new Array();
         this.m_space = gBSpace;
+        this.setAnchorPoint(cc.p(0.5, 0.5));
         this.init();
     },
 
@@ -42,15 +43,12 @@ var ShapeType = cc.Node.extend({
         switch(this.m_shapeTag){
             case 1:
             {
+                var pSize = cc.size(gSpriteW, gSpriteH);
+
                 var block = new Block();
-                this.addChild(block);
-                this.m_blocks.push();
-                block.setLRIndex(0, 0);
-                block.setSpriteColor(this.m_color);
-                var pSize = block.getContentSize();
                 this.setContentSize(pSize);
+                this.setBlock(block, 0, 0, pSize.width / 2, pSize.height / 2);
                 cc.log("shapeNodeSizeX ==> " + this.getContentSize().width + " Y " + this.getContentSize().height);
-                block.setPosition(pSize.width / 2, pSize.height / 2);
             }break;
             case 2:
             {
@@ -112,34 +110,6 @@ var ShapeType = cc.Node.extend({
             {
                 var pSize = cc.size(2 * gSpriteW + disRowLineX, gSpriteH + disY);
                 this.setContentSize(pSize);
-
-                var block1 = new Block();
-                this.addChild(block1);
-                this.m_blocks.push();
-                block1.setLRIndex(0, 0);
-                block1.setSpriteColor(this.m_color);
-                block1.setPosition(gSpriteW / 2, pSize.height - gSpriteH / 2);
-
-                var block2 = new Block();
-                this.addChild(block2);
-                this.m_blocks.push();
-                block2.setLRIndex(0, 1);
-                block2.setSpriteColor(this.m_color);
-                block2.setPosition(gSpriteW / 2 + disOneLineX, pSize.height - gSpriteH / 2);
-
-                var block3 = new Block();
-                this.addChild(block3);
-                this.m_blocks.push();
-                block3.setLRIndex(1, 1);
-                block3.setSpriteColor(this.m_color);
-                block3.setPosition(gSpriteW / 2 + disRowLineX, gSpriteH / 2);
-
-                var block4 = new Block();
-                this.addChild(block4);
-                this.m_blocks.push();
-                block4.setLRIndex(1, 2);
-                block4.setSpriteColor(this.m_color);
-                block4.setPosition(pSize.width - gSpriteW / 2, gSpriteH / 2);
 
                 var block1 = new Block();
                 this.setBlock(block1, 0, 0, gSpriteW / 2, pSize.height - gSpriteH / 2);
