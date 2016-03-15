@@ -7,6 +7,7 @@ var MapLayer = cc.LayerColor.extend({
     m_space : 0,
     m_blocks : null,
     m_map : null,
+    m_mapColor : null,
 
     ctor : function(){
         this._super();
@@ -20,16 +21,18 @@ var MapLayer = cc.LayerColor.extend({
         this.setColor(cc.color(28, 28, 28, 255));
         // 创建一个Map
         this.m_map = new Map();
-        this.m_map.init();
         // 创建存储Blocks类实例的数组
-        this.m_blocks = new Array();
+        this.m_blocks = new Array(gMapLineM);
+        for(var i = 0; i < this.m_blocks.length; ++i){
+            this.m_blocks[i] = new Array(gMapRowM);
+        }
         // 设置space
         this.m_space = gSpace;
+        this.m_mapColor = cc.color(79, 79, 79, 255);
 
        // 生成一个临时Block类,为了获得它的精灵的组件大小
         var blockT = new Block();
         blockT.release();
-        cc.log("spritew ==> " + gSpriteW + "spriteH ==> " + gSpriteH);
         if(size.width / (gSpriteH * gMapLineM) < 1 || size.height / (gSpriteH * gMapLineM) < 1){
             alert("图片资源太大,请联系管理员");
             return false;
@@ -42,29 +45,33 @@ var MapLayer = cc.LayerColor.extend({
         // 不同行中第一个元素横坐标相差的距离，它的space应该为m_space / 2,所以为disOneLineX / 2
         var disRowLineX = disOneLineX / 2;
         // 以第一行第一个元素的纵坐标为参考纵坐标,以将地图置于屏幕中心来计算
-        var flagPosY = (size.height - 8 * disY) / 2;
+        var flagPosY = size.height - (size.height - 8 * disY) / 2;
         // 以最多元素那行的第一个元素的横坐标为参考横坐标,在本例中也就是第五行...
         var flagPosX = (size.width - 8 * disOneLineX) / 2;
 
-        // 生成方块，设置其坐标和颜色，和其他属性，拼成地图
-        var mapColor = cc.color(79, 79, 79, 255);
-        for(var i = 0; i < this.m_map.mapA.length; ++i){
+        for(var i = 0; i < gMapLineM; ++i){
             // 计算每一行的元素的个数(六边形蜂窝地图)
             var lineLength = gMapLineM - Math.abs(4 - i);
             // 计算不同行之间第一个元素的横坐标
             var firstBlockX = flagPosX + Math.abs(4 - i) * disRowLineX;
-            for(var j = 0; j < lineLength; ++j){
+            var j = 0;
+            if(i > 4){
+                j = i - 4;
+            }
+            //j的初始值
+            var originJ = j;
+            //j的最大值+1
+            var rowMax = originJ + lineLength;
+            for(j; j < rowMax; ++j){
                 var block = new Block();
                 block.setLRIndex(i, j);
-                block.setSpriteColor(mapColor);
-                block.setPosition(cc.p(firstBlockX + j * disOneLineX, flagPosY + i * disY));
-                cc.log("X ==> " + block.getPositionX() + " Y ==> " + block.getPositionY());
+                block.setSpriteColor(this.m_mapColor);
+                block.setPosition(cc.p(firstBlockX + (j - originJ) * disOneLineX, flagPosY - i * disY));
                 this.addChild(block);
-                this.m_blocks.push(block);
+                this.m_blocks[i][j] = block;
             }
         }
 
-        cc.log("size ==> ", size);
         return true;
     }
 

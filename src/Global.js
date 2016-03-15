@@ -15,7 +15,7 @@ gSpace = 3;
 //方块间隙大小
 gBSpace = 2;
 //地图标记
-if(gMapTag = "undefined"){
+if(typeof gMapTag == "undefined"){
     //创建一个普通对象
     gMapTag = {};
     gMapTag.empty = 0;

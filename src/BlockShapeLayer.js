@@ -11,7 +11,7 @@ var BlockShapeLayer = cc.Layer.extend({
         this._super();
         this.m_colors = new Array();
         this.m_currentBS = new Array(4);
-        this.m_action = cc.scaleTo(0, 0.8, 0.8);
+        this.m_action = cc.scaleTo(0, 0.7, 0.7);
         this.init();
     },
 

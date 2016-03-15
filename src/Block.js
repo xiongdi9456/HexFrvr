@@ -4,8 +4,8 @@
 
 var Block = cc.Node.extend({
     //在地图中的行列索引
-    m_lineX : undefined,
-    m_rowY : undefined,
+    m_lineI : undefined,
+    m_rowI : undefined,
     //绑定的精灵
     m_sprite : null,
     //这里写color会出问题原因应该是Node中有color属性，覆盖导致出问题
@@ -53,7 +53,7 @@ var Block = cc.Node.extend({
 
     //设置行列索引
     setLRIndex : function(lIndex, rIndex){
-        this.m_lineX = lIndex;
-        this.m_rowY = rIndex;
+        this.m_lineI = lIndex;
+        this.m_rowI = rIndex;
     }
 });
