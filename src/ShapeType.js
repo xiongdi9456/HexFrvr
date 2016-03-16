@@ -7,6 +7,8 @@ var ShapeType = cc.Node.extend({
     m_color : null,
     m_blocks : null,
     m_space : 0,
+    m_oldX : 0,
+    m_oldY : 0,
 
     ctor : function(shapeTag, color){
         this._super();
@@ -283,5 +285,12 @@ var ShapeType = cc.Node.extend({
                 this.setBlock(this.m_blocks[3], 0, 3, pSize.width - gSpriteW / 2, gSpriteH / 2);
             }break;
         }
+    },
+
+    //设置它的初始位置，因为移动过程中它的坐标要改变，但还需要移回
+    setOriginalPos : function(point){
+        this.m_oldX = point.x;
+        this.m_oldY = point.y;
+        this.setPosition(point);
     }
 });

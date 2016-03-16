@@ -12,8 +12,6 @@ var GameScene = cc.Scene.extend({
     m_isMoved : false,
     m_mapBlockLineI : undefined,
     m_mapBlockRowI : undefined,
-    m_oldX : null,
-    m_oldY : null,
     m_blockTouchListener : null,
     onEnter : function(){
         this._super();
@@ -33,9 +31,7 @@ var GameScene = cc.Scene.extend({
                 self.m_target = target;
                 if(cc.rectContainsPoint(target.getBoundingBox(), pos)){
                     self.m_isBeginListen = true;
-                    if(undefined == this.m_oldX && undefined == this.m_oldY){
-                        self.m_oldX = target.x;
-                        self.m_oldY = target.y;
+                    if(undefined == this.m_oldSpace){
                         this.m_oldSpace = target.m_space;
                     }
                     target.m_space += 3;
@@ -61,7 +57,7 @@ var GameScene = cc.Scene.extend({
                 var target = event.getCurrentTarget();
                 self.m_isTouchEnd = true;
 
-                var moveBackA = cc.moveTo(0.3, self.m_oldX, self.m_oldY);
+                var moveBackA = cc.moveTo(0.3, target.m_oldX, target.m_oldY);
                 var actions = cc.spawn(moveBackA, target.getParent().m_action.clone());
                 actions.setTag(1);
                 //在一个动作上一次执行还没有完成又执行这个动作是会有问题的，动作之间会互相干扰。
@@ -221,22 +217,26 @@ var GameScene = cc.Scene.extend({
                 {
                     if(target == this.m_blockSLayer.m_currentBS[i]){
                         targetI = i;
-                        cc.log("targetI ==> " + targetI);
                         break;
                     }
                 }
+                //取得它的初始坐标
+                var originalX = target.m_oldX;
+                var originalY = target.m_oldY;
+
                 target.stopAllActions();
                 target.removeFromParent();
                 //更改方块位置
                 for(var i = this.m_blockSLayer.m_currentBS.length - 1; i > targetI; --i){
                     if(targetI + 1 == i){
-                        this.m_blockSLayer.m_currentBS[i].setPosition(cc.p(this.m_oldX, this.m_oldY));
+                        this.m_blockSLayer.m_currentBS[i].setOriginalPos(cc.p(originalX, originalY));
                     }
                     else{
-                        this.m_blockSLayer.m_currentBS[i].setPosition(this.m_blockSLayer.m_currentBS[i - 1].getPosition());
+                        this.m_blockSLayer.m_currentBS[i].setOriginalPos(this.m_blockSLayer.m_currentBS[i - 1].getPosition());
                     }
                 }
-
+                //更改方块位于存储方块容器中的索引，方块数组存储的为对应方块的地址
+                //如果给另一个变量赋此值得话，它们指向的为同一个对象
                 for(var i = targetI; i < this.m_blockSLayer.m_currentBS.length - 1; ++i){
                     this.m_blockSLayer.m_currentBS[i] = this.m_blockSLayer.m_currentBS[i + 1];
                 }
@@ -246,13 +246,11 @@ var GameScene = cc.Scene.extend({
                 var cIndex = Math.floor(cc.rand() % 7);
                 var bIndex = Math.floor(cc.rand() % 21) + 1;
                 this.m_blockSLayer.m_currentBS[3] = new ShapeType(bIndex, this.m_blockSLayer.m_colors[cIndex]);
-                //this.m_blockSLayer.m_currentBS[3].setPosition(this.m_blockSLayer.m_currentBS[2].getPosition());
                 this.m_blockSLayer.m_currentBS[3].runAction(this.m_blockSLayer.m_action.clone());
                 cc.eventManager.addListener(this.m_blockTouchListener.clone(), this.m_blockSLayer.m_currentBS[3]);
+
                 cc.log("put down ok");
             }
-            this.m_oldX = undefined;
-            this.m_oldY = undefined;
             this.m_mapBlockLineI = undefined;
             this.m_mapBlockRowI = undefined;
             this.m_isMoved = false;
@@ -281,5 +279,10 @@ var GameScene = cc.Scene.extend({
            this.cleanPutDown(target);
            this.removeBlockShape(target);
        }
+    },
+
+    //满行处理
+    dealWithFullLine : function(){
+
     }
 });
