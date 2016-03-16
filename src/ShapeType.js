@@ -57,7 +57,7 @@ var ShapeType = cc.Node.extend({
     setBlock : function(block, lIndex, rIndex, width, height){
         block.setLRIndex(lIndex, rIndex);
         block.setSpriteColor(this.m_color);
-        block.setPosition(width, height);
+        block.setPosition(cc.p(width, height));
     },
 
     //布置方块的位置，以构造方块形状

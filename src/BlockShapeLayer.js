@@ -49,11 +49,13 @@ var BlockShapeLayer = cc.Layer.extend({
         }
         else{
             this.m_currentBS[1].setPosition(cc.p(size.width - 4 * gSpriteW, size.height / 2));
-            this.m_currentBS[0].setPosition(cc.p(size.width - 4 * gSpriteW, (size.height / 2 - gSpriteH * 3)));
-            this.m_currentBS[2].setPosition(cc.p(size.width - 4 * gSpriteW, (size.height / 2 + gSpriteH * 3)));
+            this.m_currentBS[2].setPosition(cc.p(size.width - 4 * gSpriteW, (size.height / 2 - gSpriteH * 3)));
+            this.m_currentBS[0].setPosition(cc.p(size.width - 4 * gSpriteW, (size.height / 2 + gSpriteH * 3)));
         }
+        //设置第四个位置为第三个位置
+        //this.m_currentBS[3].setPosition(this.m_currentBS[2].getPosition());
 
-        for(var i = 0; i < 3; ++i){
+        for(var i = 0; i < 4; ++i){
             this.m_currentBS[i].runAction(this.m_action.clone());
         }
 
