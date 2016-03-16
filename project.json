@@ -15,7 +15,7 @@
         "src/Block.js",
         "src/Global.js",
         "src/Map.js",
-        "src/MapScene.js",
+        "src/MapLayer.js",
         "src/ShapeType.js",
         "src/BlockShapeLayer.js",
         "src/GameScene.js",

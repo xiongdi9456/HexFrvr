@@ -10,8 +10,8 @@ var GameScene = cc.Scene.extend({
     m_isBeginListen : false,
     m_isTouchEnd : false,
     m_isMoved : false,
-    m_mapLineI : undefined,
-    m_mapRowI : undefined,
+    m_mapBlockLineI : undefined,
+    m_mapBlockRowI : undefined,
     onEnter : function(){
         this._super();
 
@@ -32,7 +32,6 @@ var GameScene = cc.Scene.extend({
                 self.m_target = target;
                 if(cc.rectContainsPoint(target.getBoundingBox(), pos)){
                     self.m_isBeginListen = true;
-                    self.m_isTouchEnd = false;
                     if(undefined == this.m_oldX && undefined == this.m_oldY){
                         this.m_oldX = target.x;
                         this.m_oldY = target.y;
@@ -60,8 +59,6 @@ var GameScene = cc.Scene.extend({
             onTouchEnded : function(touch, event){
                 var target = event.getCurrentTarget();
                 self.m_isTouchEnd = true;
-                self.m_isMoved = false;
-                self.m_isBeginListen = false;
 
                 var moveBackA = cc.moveTo(0.3, this.m_oldX, this.m_oldY);
                 var actions = cc.spawn(moveBackA, target.getParent().m_action.clone());
@@ -110,6 +107,7 @@ var GameScene = cc.Scene.extend({
                     var blockRowI4 = blockRowI1 + targetBs[3].m_rowI;
 
                     //cc.log(pos);
+                    //cc.log(mapBs[i][j].getBoundingBox())
                     //cc.log("b0Line " + blockLineI1 + " b0Row " + blockRowI1);
                     //cc.log("b1Line " + blockLineI2 + " b1Row " + blockRowI2);
                     //cc.log("b2Line " + blockLineI3 + " b2Row " + blockRowI3);
@@ -124,6 +122,12 @@ var GameScene = cc.Scene.extend({
                         mapV[blockLineI3][blockRowI3] == gMapTag.empty &&
                         mapV[blockLineI4][blockRowI4] == gMapTag.empty;
                     if(bConditoion){
+                        //如果之前已经填充，然后现在又满足条件，可以填充了，应为putDown函数在
+                        //cleanPutDown函数前，这里会把前次记录的i,j覆盖，导致之前的临时填充的方块失去监控
+                        if(this.m_mapBlockLineI != undefined && this.m_mapBlockRowI != undefined){
+                            //this.cleanPutDown(this.m_target);
+                            this.directCleanPutDown(target);
+                        }
                         mapBs[blockLineI1][blockRowI1].setSpriteColor(target.m_color);
                         mapBs[blockLineI2][blockRowI2].setSpriteColor(target.m_color);
                         mapBs[blockLineI3][blockRowI3].setSpriteColor(target.m_color);
@@ -132,8 +136,8 @@ var GameScene = cc.Scene.extend({
                         mapV[blockLineI2][blockRowI2] = gMapTag.fill;
                         mapV[blockLineI3][blockRowI3] = gMapTag.fill;
                         mapV[blockLineI4][blockRowI4] = gMapTag.fill;
-                        this.m_mapLineI = i;
-                        this.m_mapRowI = j;
+                        this.m_mapBlockLineI = i;
+                        this.m_mapBlockRowI = j;
                     }
                     return;
                 }
@@ -145,7 +149,7 @@ var GameScene = cc.Scene.extend({
     * 清除放下的方块，在没有TouchEnded之前
     * */
     cleanPutDown : function(target){
-        if(this.m_mapLineI == undefined || this.m_mapRowI == undefined){
+        if(this.m_mapBlockLineI == undefined || this.m_mapBlockRowI == undefined){
             return;
         }
         var mapBs = this.m_mapLayer.m_blocks;
@@ -153,9 +157,11 @@ var GameScene = cc.Scene.extend({
         var mapV = this.m_mapLayer.m_map.m_mapA;
         var pos = this.convertToWorldPos(targetBs[0].getPosition(), target);
 
-        if(!cc.rectContainsPoint(mapBs[this.m_mapLineI][this.m_mapRowI], pos)){
-            var blockLineI1 = this.m_mapLineI;
-            var blockRowI1 = this.m_mapRowI;
+        if(cc.rectContainsPoint(mapBs[this.m_mapBlockLineI][this.m_mapBlockRowI].getBoundingBox(), pos)){
+            return;
+        }else{
+            var blockLineI1 = this.m_mapBlockLineI;
+            var blockRowI1 = this.m_mapBlockRowI;
             var blockLineI2 = blockLineI1 + targetBs[1].m_lineI;
             var blockRowI2 = blockRowI1 + targetBs[1].m_rowI;
             var blockLineI3 = blockLineI1 + targetBs[2].m_lineI;
@@ -170,8 +176,52 @@ var GameScene = cc.Scene.extend({
             mapV[blockLineI2][blockRowI2] = gMapTag.empty;
             mapV[blockLineI3][blockRowI3] = gMapTag.empty;
             mapV[blockLineI4][blockRowI4] = gMapTag.empty;
-            this.m_mapLineI = undefined;
-            this.m_mapRowI = undefined;
+            this.m_mapBlockLineI = undefined;
+            this.m_mapBlockRowI = undefined;
+        }
+    },
+
+    /*
+    * 直接清除放下的方块，不进行条件判断，请不要调用此方法
+    * */
+    directCleanPutDown : function(target){
+        var mapBs = this.m_mapLayer.m_blocks;
+        var targetBs = target.m_blocks;
+        var mapV = this.m_mapLayer.m_map.m_mapA;
+        var pos = this.convertToWorldPos(targetBs[0].getPosition(), target);
+        var blockLineI1 = this.m_mapBlockLineI;
+        var blockRowI1 = this.m_mapBlockRowI;
+        var blockLineI2 = blockLineI1 + targetBs[1].m_lineI;
+        var blockRowI2 = blockRowI1 + targetBs[1].m_rowI;
+        var blockLineI3 = blockLineI1 + targetBs[2].m_lineI;
+        var blockRowI3 = blockRowI1 + targetBs[2].m_rowI;
+        var blockLineI4 = blockLineI1 + targetBs[3].m_lineI;
+        var blockRowI4 = blockRowI1 + targetBs[3].m_rowI;
+        mapBs[blockLineI1][blockRowI1].setSpriteColor(this.m_mapLayer.m_mapColor);
+        mapBs[blockLineI2][blockRowI2].setSpriteColor(this.m_mapLayer.m_mapColor);
+        mapBs[blockLineI3][blockRowI3].setSpriteColor(this.m_mapLayer.m_mapColor);
+        mapBs[blockLineI4][blockRowI4].setSpriteColor(this.m_mapLayer.m_mapColor);
+        mapV[blockLineI1][blockRowI1] = gMapTag.empty;
+        mapV[blockLineI2][blockRowI2] = gMapTag.empty;
+        mapV[blockLineI3][blockRowI3] = gMapTag.empty;
+        mapV[blockLineI4][blockRowI4] = gMapTag.empty;
+        this.m_mapBlockLineI = undefined;
+        this.m_mapBlockRowI = undefined;
+    },
+
+    removeBlockShape : function(target){
+        if(this.m_isTouchEnd){
+            //如果已经填充了，并且放开鼠标，确定填充
+            if(this.m_mapBlockLineI != undefined && this.m_mapBlockRowI != undefined){
+                target.stopAllActions();
+                target.removeFromParent();
+                this.m_mapBlockLineI = undefined;
+                this.m_mapBlockRowI = undefined;
+                cc.log("put down ok");
+            }
+            this.m_isMoved = false;
+            this.m_isBeginListen = false;
+            this.m_isTouchEnd = false;
         }
     },
 
@@ -190,8 +240,10 @@ var GameScene = cc.Scene.extend({
 
     update : function(){
        if(this.m_isBeginListen ){
-           this.putDown(this.m_target);
-           this.cleanPutDown(this.m_target);
+           var target = this.m_target;
+           this.putDown(target);
+           this.cleanPutDown(target);
+           this.removeBlockShape(target);
        }
     }
 });
