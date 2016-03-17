@@ -250,6 +250,8 @@ var GameScene = cc.Scene.extend({
                 cc.eventManager.addListener(this.m_blockTouchListener.clone(), this.m_blockSLayer.m_currentBS[3]);
 
                 cc.log("put down ok");
+                //在放下方块后才需要进行消行判断
+                this.dealWithFullLine();
             }
             this.m_mapBlockLineI = undefined;
             this.m_mapBlockRowI = undefined;
@@ -283,6 +285,170 @@ var GameScene = cc.Scene.extend({
 
     //满行处理
     dealWithFullLine : function(){
+        var cleanLineP = new Array(9);
+        for(var i = 0; i < cleanLineP.length; ++i){
+            cleanLineP[i] = new FullFlagPoint();
+        }
+        cleanLineP[0].setLRIndexAndLength(0, 0, 5);
+        cleanLineP[1].setLRIndexAndLength(1, 0, 6);
+        cleanLineP[2].setLRIndexAndLength(2, 0, 7);
+        cleanLineP[3].setLRIndexAndLength(3, 0, 8);
+        cleanLineP[4].setLRIndexAndLength(4, 0, 9);
+        cleanLineP[5].setLRIndexAndLength(5, 1, 8);
+        cleanLineP[6].setLRIndexAndLength(6, 2, 7);
+        cleanLineP[7].setLRIndexAndLength(7, 3, 6);
+        cleanLineP[8].setLRIndexAndLength(8, 4, 5);
 
+        var cleanRowP = new Array(9);
+        for(var i = 0; i < cleanRowP.length; ++i){
+            cleanRowP[i] = new FullFlagPoint();
+            cleanRowP[i].setLRIndexAndLength(cleanLineP[i].m_rowI, cleanLineP[i].m_lineI, cleanLineP[i].m_length);
+        }
+
+        var cleanContraryRowP = new Array(9);
+        for(var i = 0; i < cleanContraryRowP.length; ++i){
+            cleanContraryRowP[i] = new FullFlagPoint();
+        }
+        cleanContraryRowP[0].setLRIndexAndLength(4, 0, 5);
+        cleanContraryRowP[1].setLRIndexAndLength(3, 0, 6);
+        cleanContraryRowP[2].setLRIndexAndLength(2, 0, 7);
+        cleanContraryRowP[3].setLRIndexAndLength(1, 0, 8);
+        cleanContraryRowP[4].setLRIndexAndLength(0, 0, 9);
+        cleanContraryRowP[5].setLRIndexAndLength(0, 1, 8);
+        cleanContraryRowP[6].setLRIndexAndLength(0, 2, 7);
+        cleanContraryRowP[7].setLRIndexAndLength(0, 3, 6);
+        cleanContraryRowP[8].setLRIndexAndLength(0, 4, 5);
+
+        var mapV = this.m_mapLayer.m_map.m_mapA;
+        //扫描行是否为有满
+        for(var i = 0; i < cleanLineP.length; ++i){
+            var originalLineI = cleanLineP[i].m_lineI;
+            var originalRowI = cleanLineP[i].m_rowI;
+            for(var j = 0; j < cleanLineP[i].m_length; ++j){
+                if( gMapTag.empty == mapV[originalLineI][originalRowI]){
+                    break;
+                }
+                //每行相同列元素只是列index差一
+                else{
+                    ++originalRowI;
+                }
+                //如果这行为满，标记
+                if(cleanLineP[i].m_length - 1 == j){
+                    cleanLineP[i].m_isFull = true;
+                }
+            }
+        }
+        //扫描列是否为有满
+        for(var i = 0; i < cleanRowP.length; ++i){
+            var originalLineI = cleanRowP[i].m_lineI;
+            var originalRowI = cleanRowP[i].m_rowI;
+            for(var j = 0; j < cleanRowP[i].m_length; ++j){
+                if( gMapTag.empty == mapV[originalLineI][originalRowI]){
+                    break;
+                }
+                //每行相同列元素只是行index差一
+                else{
+                    ++originalLineI;
+                }
+                //如果这列为满，标记
+                if(cleanRowP[i].m_length - 1 == j){
+                    cleanRowP[i].m_isFull = true;
+                }
+            }
+        }
+        //扫描反列是否为有满
+        for(var i = 0; i < cleanContraryRowP.length; ++i){
+            var originalLineI = cleanContraryRowP[i].m_lineI;
+            var originalRowI = cleanContraryRowP[i].m_rowI;
+            for(var j = 0; j < cleanContraryRowP[i].m_length; ++j){
+                if( gMapTag.empty == mapV[originalLineI][originalRowI]){
+                    break;
+                }
+                //每行相同列元素只是行index,列index差一
+                else{
+                    ++originalLineI;
+                    ++originalRowI;
+                }
+                //如果这列为满，标记
+                if(cleanContraryRowP[i].m_length - 1 == j){
+                    cleanContraryRowP[i].m_isFull = true;
+                }
+            }
+        }
+
+        var mapBs = this.m_mapLayer.m_blocks;
+        //进行消行操作
+        for(var i = 0; i < gMapLineM; ++i){
+            if(cleanLineP[i].m_isFull){
+                var originalLineI = cleanLineP[i].m_lineI;
+                var originalRowI = cleanLineP[i].m_rowI;
+                for(var j = 0; j < cleanLineP[i].m_length; ++j){
+                    mapBs[originalLineI][originalRowI].setSpriteColor(cc.color(255, 255, 255));
+                    //消除动作
+                    var fadeInA = cc.fadeIn(0.2);
+                    var blinkA = cc.blink(0.5, 2);
+                    var mapColor = this.m_mapLayer.m_mapColor;
+                    var cleanAction = cc.sequence(fadeInA, blinkA, new cc.CallFunc(function(){
+                        this.setSpriteColor(mapColor);
+                    }, mapBs[originalLineI][originalRowI], mapColor));
+                    cleanAction.setTag(1);
+                    //在执行动作之前先停止其动作，以避免一个对象执行同个动作多次
+                    mapBs[originalLineI][originalRowI].stopActionByTag(1);
+                    mapBs[originalLineI][originalRowI].runAction(cleanAction);
+
+                    mapV[originalLineI][originalRowI] = gMapTag.empty;
+                    ++originalRowI;
+                }
+                //清除后重新标记
+                cleanLineP[i].m_isFull = false;
+            }
+            if(cleanRowP[i].m_isFull){
+                var originalLineI = cleanRowP[i].m_lineI;
+                var originalRowI = cleanRowP[i].m_rowI;
+                for(var j = 0; j < cleanRowP[i].m_length; ++j){
+                    mapBs[originalLineI][originalRowI].setSpriteColor(cc.color(255, 255, 255));
+                    //消除动作
+                    var fadeInA = cc.fadeIn(0.2);
+                    var blinkA = cc.blink(0.5, 2);
+                    var mapColor = this.m_mapLayer.m_mapColor;
+                    var cleanAction = cc.sequence(fadeInA, blinkA, new cc.CallFunc(function(){
+                        this.setSpriteColor(mapColor);
+                    }, mapBs[originalLineI][originalRowI], mapColor));
+                    cleanAction.setTag(1);
+                    //在执行动作之前先停止其动作，以避免一个对象执行同个动作多次
+                    mapBs[originalLineI][originalRowI].stopActionByTag(1);
+                    mapBs[originalLineI][originalRowI].runAction(cleanAction);
+
+                    mapV[originalLineI][originalRowI] = gMapTag.empty;
+                    ++originalLineI;
+                }
+                //清除后重新标记
+                cleanRowP[i].m_isFull = false;
+            }
+            if(cleanContraryRowP[i].m_isFull){
+                var originalLineI = cleanContraryRowP[i].m_lineI;
+                var originalRowI = cleanContraryRowP[i].m_rowI;
+                for(var j = 0; j < cleanContraryRowP[i].m_length; ++j){
+                    mapBs[originalLineI][originalRowI].setSpriteColor(cc.color(255, 255, 255));
+                    //消除动作
+                    var fadeInA = cc.fadeIn(0.2);
+                    var blinkA = cc.blink(0.5, 2);
+                    var mapColor = this.m_mapLayer.m_mapColor;
+                    var cleanAction = cc.sequence(fadeInA, blinkA, new cc.CallFunc(function(){
+                        this.setSpriteColor(mapColor);
+                    }, mapBs[originalLineI][originalRowI], mapColor));
+                    cleanAction.setTag(1);
+                    //在执行动作之前先停止其动作，以避免一个对象执行同个动作多次
+                    mapBs[originalLineI][originalRowI].stopActionByTag(1);
+                    mapBs[originalLineI][originalRowI].runAction(cleanAction);
+
+                    mapV[originalLineI][originalRowI] = gMapTag.empty;
+                    ++originalLineI;
+                    ++originalRowI;
+                }
+                //清除后重新标记
+                cleanContraryRowP[i].m_isFull = false;
+            }
+        }
     }
 });

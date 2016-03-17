@@ -2,15 +2,13 @@
  * Created by LuoXiang on 2016/3/7.
  */
 
-var Map = cc.Node.extend({
+var Map = cc.Class.extend({
     m_mapA : null,
     ctor : function(){
-        this._super();
         this.init();
     },
 
     init : function(){
-        this._super();
         this.m_mapA = new Array(gMapLineM);
         //创建一个二维数组
         for(var i = 0; i < this.m_mapA.length; ++i){
