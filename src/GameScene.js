@@ -7,19 +7,29 @@ var GameScene = cc.Scene.extend({
     m_target : null,
     m_mapLayer : null,
     m_blockSLayer : null,
+    m_statusLayer : null,
     m_isBeginListen : false,
     m_isTouchEnd : false,
     m_isMoved : false,
+    m_isGameOver : false,
     m_mapBlockLineI : undefined,
     m_mapBlockRowI : undefined,
     m_blockTouchListener : null,
+
+    m_score : 0,
+    m_cleanScore : 0,
+    m_cleanCount : 0,
+    m_putDownScore : 0,
+    m_putDownCount : 0,
     onEnter : function(){
         this._super();
 
         this.m_mapLayer = new MapLayer();
         this.m_blockSLayer = new BlockShapeLayer();
+        this.m_statusLayer = new StatusLayer();
         this.addChild(this.m_mapLayer);
         this.addChild(this.m_blockSLayer);
+        this.addChild(this.m_statusLayer);
         var self = this;
         this.m_blockTouchListener = cc.EventListener.create({
             event : cc.EventListener.TOUCH_ONE_BY_ONE,
@@ -142,8 +152,8 @@ var GameScene = cc.Scene.extend({
         var mapV = this.m_mapLayer.m_map.m_mapA;
 
         //最后一个方块为缓冲方块，其并不可见，不需判断
-        for(var i = 0; i < this.m_blockSLayer.m_currentBS.length - 1; ++i){
-            var targetBs = this.m_blockSLayer.m_currentBS[i].m_blocks;
+        for(var k = 0; k < this.m_blockSLayer.m_currentBS.length - 1; ++k){
+            var targetBs = this.m_blockSLayer.m_currentBS[k].m_blocks;
             for(var i = 0; i < mapBs.length; ++i){
                 // 计算每一行的元素的个数
                 var lineLength = gMapLineM - Math.abs(4 - i);
@@ -176,8 +186,9 @@ var GameScene = cc.Scene.extend({
                     }
                 }
             }
+            cc.log("k is: " + k);
         }
-        cc.log("Game Over!");
+        this.m_isGameOver = true;
         return false;
     },
 
@@ -288,8 +299,14 @@ var GameScene = cc.Scene.extend({
                 cc.eventManager.addListener(this.m_blockTouchListener.clone(), this.m_blockSLayer.m_currentBS[3]);
 
                 cc.log("put down ok");
+                //更新放下方块数
+                ++this.m_putDownCount;
+                //记录得分
+                this.m_putDownScore = gScoreBase;
                 //在放下方块后才需要进行消行判断
                 this.dealWithFullLine();
+                //更新分数
+                this.addScore();
                 //放下方块后，并且地图清理后，要判断当前地图是否还能放下方块
                 this.canPutDown();
             }
@@ -320,6 +337,7 @@ var GameScene = cc.Scene.extend({
            this.putDown(target);
            this.cleanPutDown(target);
            this.removeBlockShape(target);
+           this.gameOver();
        }
     },
 
@@ -426,9 +444,9 @@ var GameScene = cc.Scene.extend({
                     mapBs[originalLineI][originalRowI].setSpriteColor(cc.color(255, 255, 255));
                     //消除动作
                     var fadeInA = cc.fadeIn(0.2);
-                    var blinkA = cc.blink(0.5, 2);
+                    //var blinkA = cc.blink(0.5, 2);
                     var mapColor = this.m_mapLayer.m_mapColor;
-                    var cleanAction = cc.sequence(fadeInA, blinkA, new cc.CallFunc(function(){
+                    var cleanAction = cc.sequence(fadeInA, cc.delayTime(0.2), new cc.CallFunc(function(){
                         this.setSpriteColor(mapColor);
                     }, mapBs[originalLineI][originalRowI], mapColor));
                     cleanAction.setTag(1);
@@ -441,6 +459,10 @@ var GameScene = cc.Scene.extend({
                 }
                 //清除后重新标记
                 cleanLineP[i].m_isFull = false;
+                //更新消行数
+                ++this.m_cleanCount;
+                //记录得分
+                this.m_cleanScore += 140 + (cleanLineP[i].m_length - 5) * 20;
             }
             if(cleanRowP[i].m_isFull){
                 var originalLineI = cleanRowP[i].m_lineI;
@@ -449,9 +471,9 @@ var GameScene = cc.Scene.extend({
                     mapBs[originalLineI][originalRowI].setSpriteColor(cc.color(255, 255, 255));
                     //消除动作
                     var fadeInA = cc.fadeIn(0.2);
-                    var blinkA = cc.blink(0.5, 2);
+                    //var blinkA = cc.blink(0.5, 2);
                     var mapColor = this.m_mapLayer.m_mapColor;
-                    var cleanAction = cc.sequence(fadeInA, blinkA, new cc.CallFunc(function(){
+                    var cleanAction = cc.sequence(fadeInA, cc.delayTime(0.2), new cc.CallFunc(function(){
                         this.setSpriteColor(mapColor);
                     }, mapBs[originalLineI][originalRowI], mapColor));
                     cleanAction.setTag(1);
@@ -464,6 +486,10 @@ var GameScene = cc.Scene.extend({
                 }
                 //清除后重新标记
                 cleanRowP[i].m_isFull = false;
+                //更新消行数
+                ++this.m_cleanCount;
+                //记录得分
+                this.m_cleanScore += 140 + (cleanLineP[i].m_length - 5) * 20;
             }
             if(cleanContraryRowP[i].m_isFull){
                 var originalLineI = cleanContraryRowP[i].m_lineI;
@@ -472,9 +498,9 @@ var GameScene = cc.Scene.extend({
                     mapBs[originalLineI][originalRowI].setSpriteColor(cc.color(255, 255, 255));
                     //消除动作
                     var fadeInA = cc.fadeIn(0.2);
-                    var blinkA = cc.blink(0.5, 2);
+                    //var blinkA = cc.blink(0.5, 2);
                     var mapColor = this.m_mapLayer.m_mapColor;
-                    var cleanAction = cc.sequence(fadeInA, blinkA, new cc.CallFunc(function(){
+                    var cleanAction = cc.sequence(fadeInA, cc.delayTime(0.2), new cc.CallFunc(function(){
                         this.setSpriteColor(mapColor);
                     }, mapBs[originalLineI][originalRowI], mapColor));
                     cleanAction.setTag(1);
@@ -488,12 +514,28 @@ var GameScene = cc.Scene.extend({
                 }
                 //清除后重新标记
                 cleanContraryRowP[i].m_isFull = false;
+                //更新消行数
+                ++this.m_cleanCount;
+                //记录得分
+                this.m_cleanScore += 140 + (cleanLineP[i].m_length - 5) * 20;
             }
         }
     },
 
-    //计算的分
+    //计算得分
     addScore : function(){
+        this.m_score += this.m_putDownScore + this.m_cleanScore;
+        //每次得分后的初始化
+        this.m_putDownScore = 0;
+        this.m_cleanScore = 0;
+        cc.log("Score: " + this.m_score);
+    },
 
+    gameOver : function(){
+        if(this.m_isGameOver){
+            var gameLayer = new GameOverLayer();
+            this.addChild(gameLayer);
+            this.m_isGameOver = false;
+        }
     }
 });

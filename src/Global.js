@@ -14,6 +14,13 @@ gSpriteH = 0;
 gSpace = 3;
 //方块间隙大小
 gBSpace = 2;
+//放下一个方块的分值
+gScoreBase = 40;
+gScoreLabelSpace = 50;
+gScoreLabelFontSize = 60;
+gHighestLSpaceY = 50;
+gHighestLSpaceX = 100;
+gHighestLFontSize = 40;
 //地图标记
 if(typeof gMapTag == "undefined"){
     //创建一个普通对象
