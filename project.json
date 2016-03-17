@@ -19,6 +19,7 @@
         "src/ShapeType.js",
         "src/BlockShapeLayer.js",
         "src/GameScene.js",
+        "src/FullFlagPoint.js",
         "src/Test.js"
     ]
 }

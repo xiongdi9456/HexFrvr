@@ -78,7 +78,7 @@ var GameScene = cc.Scene.extend({
         this.scheduleUpdate();
     },
 
-    //判断是否能够放下，
+    //判断当前位置是否能够放下，
     putDown : function(target){
         var mapBs = this.m_mapLayer.m_blocks;
         var targetBs = target.m_blocks;
@@ -103,13 +103,6 @@ var GameScene = cc.Scene.extend({
                     var blockRowI3 = blockRowI1 + targetBs[2].m_rowI;
                     var blockLineI4 = blockLineI1 + targetBs[3].m_lineI;
                     var blockRowI4 = blockRowI1 + targetBs[3].m_rowI;
-
-                    //cc.log(pos);
-                    //cc.log(mapBs[i][j].getBoundingBox())
-                    //cc.log("b0Line " + blockLineI1 + " b0Row " + blockRowI1);
-                    //cc.log("b1Line " + blockLineI2 + " b1Row " + blockRowI2);
-                    //cc.log("b2Line " + blockLineI3 + " b2Row " + blockRowI3);
-                    //cc.log("b3Line " + blockLineI4 + " b3Row " + blockRowI4);
 
                     var bConditoion =
                         blockLineI2 >= 0 && blockLineI2 < rowMax &&
@@ -141,6 +134,51 @@ var GameScene = cc.Scene.extend({
                 }
             }
         }
+    },
+
+    //判断地图中是否还有位置能够放下
+    canPutDown : function(){
+        var mapBs = this.m_mapLayer.m_blocks;
+        var mapV = this.m_mapLayer.m_map.m_mapA;
+
+        //最后一个方块为缓冲方块，其并不可见，不需判断
+        for(var i = 0; i < this.m_blockSLayer.m_currentBS.length - 1; ++i){
+            var targetBs = this.m_blockSLayer.m_currentBS[i].m_blocks;
+            for(var i = 0; i < mapBs.length; ++i){
+                // 计算每一行的元素的个数
+                var lineLength = gMapLineM - Math.abs(4 - i);
+                var j = 0;
+                if(i > 4){
+                    j = i - 4;
+                }
+                var rowMax = j + lineLength;
+                for(j; j < rowMax; ++j){
+                    if(gMapTag.empty == mapV[i][j]) {
+                        var blockLineI1 = i;
+                        var blockRowI1 = j;
+                        var blockLineI2 = blockLineI1 + targetBs[1].m_lineI;
+                        var blockRowI2 = blockRowI1 + targetBs[1].m_rowI;
+                        var blockLineI3 = blockLineI1 + targetBs[2].m_lineI;
+                        var blockRowI3 = blockRowI1 + targetBs[2].m_rowI;
+                        var blockLineI4 = blockLineI1 + targetBs[3].m_lineI;
+                        var blockRowI4 = blockRowI1 + targetBs[3].m_rowI;
+
+                        var bConditoion =
+                            blockLineI2 >= 0 && blockLineI2 < rowMax &&
+                            blockLineI3 >= 0 && blockLineI3 < rowMax &&
+                            blockLineI4 >= 0 && blockLineI4 < rowMax &&
+                            mapV[blockLineI2][blockRowI2] == gMapTag.empty &&
+                            mapV[blockLineI3][blockRowI3] == gMapTag.empty &&
+                            mapV[blockLineI4][blockRowI4] == gMapTag.empty;
+                        if(bConditoion){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        cc.log("Game Over!");
+        return false;
     },
 
     /*
@@ -252,6 +290,8 @@ var GameScene = cc.Scene.extend({
                 cc.log("put down ok");
                 //在放下方块后才需要进行消行判断
                 this.dealWithFullLine();
+                //放下方块后，并且地图清理后，要判断当前地图是否还能放下方块
+                this.canPutDown();
             }
             this.m_mapBlockLineI = undefined;
             this.m_mapBlockRowI = undefined;
@@ -450,5 +490,10 @@ var GameScene = cc.Scene.extend({
                 cleanContraryRowP[i].m_isFull = false;
             }
         }
+    },
+
+    //计算的分
+    addScore : function(){
+
     }
 });
