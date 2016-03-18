@@ -14,6 +14,9 @@ var FullFlagPoint = cc.Class.extend({
     init : function(){
     },
 
+    /*
+    * 设置此点的行列索引以及本行或列中的元素个数
+    * */
     setLRIndexAndLength : function(lIndex, rIndex, length){
         this.m_lineI = lIndex;
         this.m_rowI = rIndex;

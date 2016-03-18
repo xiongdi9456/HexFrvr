@@ -11,14 +11,14 @@ gMapRowM = 9;
 gSpriteW = 0;
 gSpriteH = 0;
 //地图间隙大小
-gSpace = 3;
+gSpace = 3.5;
 //方块间隙大小
 gBSpace = 2;
 //放下一个方块的分值
 gScoreBase = 40;
-gScoreLabelSpace = 50;
-gScoreLabelFontSize = 60;
-gHighestLSpaceY = 50;
+gScoreLabelSpace = 40;
+gScoreLabelFontSize = 50;
+gHighestLSpaceY = 40;
 gHighestLSpaceX = 100;
 gHighestLFontSize = 40;
 //地图标记

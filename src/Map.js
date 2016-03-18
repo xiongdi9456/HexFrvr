@@ -17,7 +17,9 @@ var Map = cc.Class.extend({
         this.mapClean();
     },
 
-    //初始化方法
+    /*
+    * 初始化地图
+    * */
     mapClean : function(){
         //初始化
         for(var i = 0; i < this.m_mapA.length; ++i){

@@ -20,19 +20,24 @@ var Block = cc.Node.extend({
         this._super();
 
         this.m_sprite = new cc.Sprite(res.block_png);
+        var cSize = this.m_sprite.getContentSize();
+        this.setContentSize(cSize);
+        this.setAnchorPoint(cc.p(0.5, 0.5));
         this.addChild(this.m_sprite);
         this.m_color = cc.color(255, 255, 255, 255);
         this.m_sprite.setColor(this.m_color);
-        var cSize = this.m_sprite.getContentSize();
-        this.setContentSize(cSize);
+        //记得要设置位置，锚点与原点是没有关系的
+        this.m_sprite.setPosition(cc.p(cSize.width / 2, cSize.height / 2));
+
         gSpriteW = cSize.width;
         gSpriteH = cSize.height;
 
-        this.setAnchorPoint(cc.p(0.5, 0.5));
         return true;
     },
 
-    //绑定精灵
+    /*
+    * 绑定精灵
+    * */
     bindSprite : function(sprite){
         //先将旧精灵移除
         this.removeFromParent(this.m_sprite);
@@ -41,17 +46,22 @@ var Block = cc.Node.extend({
         this.m_sprite.setColor(this.color);
         var cSize = this.m_sprite.getContentSize();
         this.setContentSize(cSize);
+        this.m_sprite.setPosition(cc.p(cSize.width / 2, cSize.height / 2));
         gSpriteW = cSize.width;
         gSpriteH = cSize.height;
     },
 
-    //给精灵设置颜色
+    /*
+    * 设置精灵颜色
+    * */
     setSpriteColor : function(color){
         this.m_sprite.setColor(color);
         this.m_color = color;
     },
 
-    //设置行列索引
+    /*
+    * //设置行列索引
+    * */
     setLRIndex : function(lIndex, rIndex){
         this.m_lineI = lIndex;
         this.m_rowI = rIndex;

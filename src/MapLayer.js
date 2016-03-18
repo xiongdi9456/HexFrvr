@@ -39,7 +39,8 @@ var MapLayer = cc.LayerColor.extend({
         }
         // 各行纵坐标之间相差的距离，保留三位小数点，如果屏幕分辨率height
         // 为1000的话，差距只有0.1，原式为blockT.m_spriteW / 2 / Math.sqrt(3)
-        var disY = gSpriteH - parseFloat((gSpriteW * Math.sqrt(3) / 6)).toFixed(3) + this.m_space;
+        var disY = gSpriteH - parseFloat((gSpriteW * Math.sqrt(3) / 6)).toFixed(3)
+            + parseFloat(this.m_space / Math.sqrt(3)).toFixed(1) * 2;
         // 同一行中横坐标相差的距离,
         var disOneLineX = gSpriteW + this.m_space;
         // 不同行中第一个元素横坐标相差的距离，它的space应该为m_space / 2,所以为disOneLineX / 2

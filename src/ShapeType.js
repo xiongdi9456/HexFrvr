@@ -62,12 +62,14 @@ var ShapeType = cc.Node.extend({
         block.setPosition(cc.p(width, height));
     },
 
-    //布置方块的位置，以构造方块形状
+    /*
+    * 布置方块的位置，以构造方块形状
+    * */
     setBlockPos : function(){
         //两个六边形嵌入时重叠的距离
         var difH = parseFloat((gSpriteW * Math.sqrt(3) / 6)).toFixed(3);
         // 各行纵坐标之间相差的距离
-        var disY = gSpriteH - difH + this.m_space;
+        var disY = gSpriteH - difH + + parseFloat(this.m_space / Math.sqrt(3)).toFixed(1) * 2;
         // 同一行中横坐标相差的距离
         var disOneLineX = gSpriteW + this.m_space;
         // 不同行中横坐标相差的距离
@@ -287,7 +289,9 @@ var ShapeType = cc.Node.extend({
         }
     },
 
-    //设置它的初始位置，因为移动过程中它的坐标要改变，但还需要移回
+    /*
+    * 设置它的初始位置，因为移动过程中它的坐标要改变，但还需要移回
+    * */
     setOriginalPos : function(point){
         this.m_oldX = point.x;
         this.m_oldY = point.y;

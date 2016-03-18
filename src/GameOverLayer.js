@@ -23,7 +23,7 @@ var GameOverLayer = cc.Layer.extend({
             swallowTouches : true,
 
             onTouchBegan : function(touch, event){
-                return false;
+                return true;
             },
 
             onTouchMoved : function(touch, event){
@@ -33,14 +33,14 @@ var GameOverLayer = cc.Layer.extend({
             onTouchEnded : function(touch, event){
 
             }
-        }), this);
+        }), -1);
 
+        //this.setColor(cc.color(100, 100, 100, 0));
         this.m_gameOverLabel = new cc.LabelTTF("没有地方放了", "Arial", this.m_gameOverLFontS);
-        this.attr({
+        this.m_gameOverLabel.attr({
             x : size.width / 2,
             y : size.height / 2,
         });
-        this.m_gameOverLabel.setAnchorPoint(cc.p(0.5, 0.5));
         this.addChild(this.m_gameOverLabel);
     }
 });

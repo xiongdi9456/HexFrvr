@@ -24,7 +24,7 @@ var BlockShapeLayer = cc.Layer.extend({
         this.m_colors.push(cc.color(255, 128, 0));
         this.m_colors.push(cc.color(255, 255, 0));
         this.m_colors.push(cc.color(0, 255, 0));
-        this.m_colors.push(cc.color(0, 255, 255));
+        this.m_colors.push(cc.color(255, 52, 179));
         this.m_colors.push(cc.color(0, 0, 255));
         this.m_colors.push(cc.color(128, 0, 255));
 
@@ -48,9 +48,9 @@ var BlockShapeLayer = cc.Layer.extend({
             this.m_currentBS[2].setOriginalPos(cc.p((size.width / 2 + gSpriteW * 4), 20));
         }
         else{
-            this.m_currentBS[1].setOriginalPos(cc.p(size.width - 4 * gSpriteW, size.height / 2));
-            this.m_currentBS[2].setOriginalPos(cc.p(size.width - 4 * gSpriteW, (size.height / 2 - gSpriteH * 3)));
-            this.m_currentBS[0].setOriginalPos(cc.p(size.width - 4 * gSpriteW, (size.height / 2 + gSpriteH * 3)));
+            this.m_currentBS[1].setOriginalPos(cc.p(size.width - 3 * gSpriteW, size.height / 2));
+            this.m_currentBS[2].setOriginalPos(cc.p(size.width - 3 * gSpriteW, (size.height / 2 - gSpriteH * 3)));
+            this.m_currentBS[0].setOriginalPos(cc.p(size.width - 3 * gSpriteW, (size.height / 2 + gSpriteH * 3)));
         }
 
         for(var i = 0; i < 4; ++i){

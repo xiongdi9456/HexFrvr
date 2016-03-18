@@ -21,6 +21,7 @@ var GameScene = cc.Scene.extend({
     m_cleanCount : 0,
     m_putDownScore : 0,
     m_putDownCount : 0,
+    m_showScoreLFSize : 40,
     onEnter : function(){
         this._super();
 
@@ -44,7 +45,7 @@ var GameScene = cc.Scene.extend({
                     if(undefined == this.m_oldSpace){
                         this.m_oldSpace = target.m_space;
                     }
-                    target.m_space += 3;
+                    target.m_space += 5;
                     //以当前间隙重新设置坐标
                     target.setBlockPos();
                     var scaleA = cc.scaleTo(0, 0.9, 0.9);
@@ -88,7 +89,9 @@ var GameScene = cc.Scene.extend({
         this.scheduleUpdate();
     },
 
-    //判断当前位置是否能够放下，
+    /*
+    * 判断当前位置是否能够放下
+    * */
     putDown : function(target){
         var mapBs = this.m_mapLayer.m_blocks;
         var targetBs = target.m_blocks;
@@ -146,7 +149,9 @@ var GameScene = cc.Scene.extend({
         }
     },
 
-    //判断地图中是否还有位置能够放下
+    /*
+    * 判断地图中是否还有位置能够放下
+    * */
     canPutDown : function(){
         var mapBs = this.m_mapLayer.m_blocks;
         var mapV = this.m_mapLayer.m_map.m_mapA;
@@ -235,7 +240,6 @@ var GameScene = cc.Scene.extend({
         var mapBs = this.m_mapLayer.m_blocks;
         var targetBs = target.m_blocks;
         var mapV = this.m_mapLayer.m_map.m_mapA;
-        var pos = this.convertToWorldPos(targetBs[0].getPosition(), target);
         var blockLineI1 = this.m_mapBlockLineI;
         var blockRowI1 = this.m_mapBlockRowI;
         var blockLineI2 = blockLineI1 + targetBs[1].m_lineI;
@@ -256,6 +260,9 @@ var GameScene = cc.Scene.extend({
         this.m_mapBlockRowI = undefined;
     },
 
+    /*
+    * 移除已经放下的形状方块,并进行相应处理
+    * */
     removeBlockShape : function(target){
         if(this.m_isTouchEnd){
             //如果已经填充了，并且放开鼠标，确定填充
@@ -303,6 +310,9 @@ var GameScene = cc.Scene.extend({
                 ++this.m_putDownCount;
                 //记录得分
                 this.m_putDownScore = gScoreBase;
+                var posT = this.m_mapLayer.m_blocks[this.m_mapBlockLineI][this.m_mapBlockRowI].getPosition();
+                //显示得分
+                this.showScoreLabel(posT, this.m_putDownScore);
                 //在放下方块后才需要进行消行判断
                 this.dealWithFullLine();
                 //更新分数
@@ -341,7 +351,10 @@ var GameScene = cc.Scene.extend({
        }
     },
 
-    //满行处理
+    /*
+    * 满行处理, 算法为，遍历所有行，遍历所有列，遍历所有反列，并记录是否有full，
+    * 然后统一消除记录的满行单位
+    * */
     dealWithFullLine : function(){
         var cleanLineP = new Array(9);
         for(var i = 0; i < cleanLineP.length; ++i){
@@ -441,12 +454,11 @@ var GameScene = cc.Scene.extend({
                 var originalLineI = cleanLineP[i].m_lineI;
                 var originalRowI = cleanLineP[i].m_rowI;
                 for(var j = 0; j < cleanLineP[i].m_length; ++j){
-                    mapBs[originalLineI][originalRowI].setSpriteColor(cc.color(255, 255, 255));
+                    mapBs[originalLineI][originalRowI].setSpriteColor(cc.color(238, 233, 233));
                     //消除动作
                     var fadeInA = cc.fadeIn(0.2);
-                    //var blinkA = cc.blink(0.5, 2);
                     var mapColor = this.m_mapLayer.m_mapColor;
-                    var cleanAction = cc.sequence(fadeInA, cc.delayTime(0.2), new cc.CallFunc(function(){
+                    var cleanAction = cc.sequence(fadeInA, cc.delayTime(0.2), fadeInA.reverse(), new cc.CallFunc(function(){
                         this.setSpriteColor(mapColor);
                     }, mapBs[originalLineI][originalRowI], mapColor));
                     cleanAction.setTag(1);
@@ -462,18 +474,30 @@ var GameScene = cc.Scene.extend({
                 //更新消行数
                 ++this.m_cleanCount;
                 //记录得分
-                this.m_cleanScore += 140 + (cleanLineP[i].m_length - 5) * 20;
+                var itCleanScore = 140 + (cleanLineP[i].m_length - 5) * 20;
+                this.m_cleanScore += itCleanScore;
+                //显示得分
+                var posT = 0;
+                var middle = Math.floor(cleanLineP[i].m_length / 2);
+                if(cleanLineP[i].length % 2){
+                    posT = mapBs[cleanLineP[i].m_lineI][cleanLineP[i].m_rowI + middle].getPosition();
+                }
+                else{
+                    var firstP = mapBs[cleanLineP[i].m_lineI][cleanLineP[i].m_rowI + middle - 1].getPosition();
+                    var secondP = mapBs[cleanLineP[i].m_lineI][cleanLineP[i].m_rowI + middle].getPosition();
+                    posT = cc.p(firstP.x + (secondP.x - firstP.x) / 2, firstP.y);
+                }
+                this.showScoreLabel(posT, itCleanScore);
             }
             if(cleanRowP[i].m_isFull){
                 var originalLineI = cleanRowP[i].m_lineI;
                 var originalRowI = cleanRowP[i].m_rowI;
                 for(var j = 0; j < cleanRowP[i].m_length; ++j){
-                    mapBs[originalLineI][originalRowI].setSpriteColor(cc.color(255, 255, 255));
+                    mapBs[originalLineI][originalRowI].setSpriteColor(cc.color(238, 233, 233));
                     //消除动作
                     var fadeInA = cc.fadeIn(0.2);
-                    //var blinkA = cc.blink(0.5, 2);
                     var mapColor = this.m_mapLayer.m_mapColor;
-                    var cleanAction = cc.sequence(fadeInA, cc.delayTime(0.2), new cc.CallFunc(function(){
+                    var cleanAction = cc.sequence(fadeInA, cc.delayTime(0.2), fadeInA.reverse(), new cc.CallFunc(function(){
                         this.setSpriteColor(mapColor);
                     }, mapBs[originalLineI][originalRowI], mapColor));
                     cleanAction.setTag(1);
@@ -489,18 +513,31 @@ var GameScene = cc.Scene.extend({
                 //更新消行数
                 ++this.m_cleanCount;
                 //记录得分
-                this.m_cleanScore += 140 + (cleanLineP[i].m_length - 5) * 20;
+                var itCleanScore = 140 + (cleanRowP[i].m_length - 5) * 20;
+                this.m_cleanScore += itCleanScore;
+                //显示得分
+                var posT = 0;
+                var middle = Math.floor(cleanRowP[i].m_length / 2);
+                cc.log(middle);
+                if(cleanRowP[i].length % 2){
+                    posT = mapBs[cleanRowP[i].m_lineI + middle][cleanRowP[i].m_rowI].getPosition();
+                }
+                else{
+                    var firstP = mapBs[cleanRowP[i].m_lineI + middle - 1][cleanRowP[i].m_rowI].getPosition();
+                    var secondP = mapBs[cleanRowP[i].m_lineI + middle][cleanRowP[i].m_rowI].getPosition();
+                    posT = cc.p(secondP.x + (firstP.x - secondP.x) / 2, secondP.y + (firstP.y - secondP.y) / 2);
+                }
+                this.showScoreLabel(posT, itCleanScore);
             }
             if(cleanContraryRowP[i].m_isFull){
                 var originalLineI = cleanContraryRowP[i].m_lineI;
                 var originalRowI = cleanContraryRowP[i].m_rowI;
                 for(var j = 0; j < cleanContraryRowP[i].m_length; ++j){
-                    mapBs[originalLineI][originalRowI].setSpriteColor(cc.color(255, 255, 255));
+                    mapBs[originalLineI][originalRowI].setSpriteColor(cc.color(238, 233, 233));
                     //消除动作
                     var fadeInA = cc.fadeIn(0.2);
-                    //var blinkA = cc.blink(0.5, 2);
                     var mapColor = this.m_mapLayer.m_mapColor;
-                    var cleanAction = cc.sequence(fadeInA, cc.delayTime(0.2), new cc.CallFunc(function(){
+                    var cleanAction = cc.sequence(fadeInA, cc.delayTime(0.2), fadeInA.reverse(),  new cc.CallFunc(function(){
                         this.setSpriteColor(mapColor);
                     }, mapBs[originalLineI][originalRowI], mapColor));
                     cleanAction.setTag(1);
@@ -517,12 +554,27 @@ var GameScene = cc.Scene.extend({
                 //更新消行数
                 ++this.m_cleanCount;
                 //记录得分
-                this.m_cleanScore += 140 + (cleanLineP[i].m_length - 5) * 20;
+                var itCleanScore = 140 + (cleanLineP[i].m_length - 5) * 20;
+                this.m_cleanScore += itCleanScore;
+                //显示得分
+                var posT = 0;
+                var middle = Math.floor(cleanContraryRowP[i].m_length / 2);
+                if(cleanContraryRowP[i].length % 2){
+                    posT = mapBs[cleanContraryRowP[i].m_lineI + middle][cleanContraryRowP[i].m_rowI].getPosition();
+                }
+                else{
+                    var firstP = mapBs[cleanContraryRowP[i].m_lineI + middle - 1][cleanContraryRowP[i].m_rowI + middle - 1].getPosition();
+                    var secondP = mapBs[cleanContraryRowP[i].m_lineI + middle][cleanContraryRowP[i].m_rowI + middle].getPosition();
+                    posT = cc.p(firstP.x + (secondP.x - firstP.x) / 2, secondP.y + (firstP.y - secondP.y) / 2);
+                }
+                this.showScoreLabel(posT, itCleanScore);
             }
         }
     },
 
-    //计算得分
+    /*
+    * 得分计算
+    * */
     addScore : function(){
         this.m_score += this.m_putDownScore + this.m_cleanScore;
         //每次得分后的初始化
@@ -531,11 +583,31 @@ var GameScene = cc.Scene.extend({
         cc.log("Score: " + this.m_score);
     },
 
+    /*
+    * 游戏结束处理
+    * */
     gameOver : function(){
         if(this.m_isGameOver){
             var gameLayer = new GameOverLayer();
             this.addChild(gameLayer);
             this.m_isGameOver = false;
         }
+    },
+
+    /*
+    * 每次放下或者行满时，显示获得的分数
+    * */
+    showScoreLabel : function(pos, score){
+        var showScoreLabel = new cc.LabelTTF("", "Arial", this.m_showScoreLFSize);
+        this.addChild(showScoreLabel);
+        showScoreLabel.setString("" + score);
+        showScoreLabel.setPosition(cc.p(pos.x, pos.y));
+        var fadeIn = cc.fadeIn(0.2);
+        var moveTo = cc.moveTo(0.2, showScoreLabel.getPositionX(), showScoreLabel.getPositionY() + 10);
+        //回调函数传参,是在函数参数里面，注意别写错
+        var showAction = cc.sequence(fadeIn, moveTo, cc.callFunc(function(){
+            this.removeFromParent();
+        }, showScoreLabel));
+        showScoreLabel.runAction(showAction);
     }
 });
