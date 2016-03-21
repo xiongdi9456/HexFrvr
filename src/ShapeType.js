@@ -2,6 +2,9 @@
  * Created by LuoXiang on 2016/3/9.
  */
 
+/*
+* 构建形状方块的类
+* */
 var ShapeType = cc.Node.extend({
     m_shapeTag : 0,
     m_color : null,

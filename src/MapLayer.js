@@ -2,6 +2,9 @@
  * Created by LuoXiang on 2016/3/7.
  */
 
+/*
+* 地图层，显示地图
+* */
 var MapLayer = cc.LayerColor.extend({
     //每个方块之间的间隙大小，行列都是一样
     m_space : 0,

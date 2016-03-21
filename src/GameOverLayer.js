@@ -2,6 +2,9 @@
  * Created by LuoXiang on 2016/3/17.
  */
 
+/*
+* 游戏结束层
+* */
 var GameOverLayer = cc.Layer.extend({
     m_gameOverLabel : null,
     m_gameOverLFontS : 40,
@@ -35,7 +38,6 @@ var GameOverLayer = cc.Layer.extend({
             }
         }), -1);
 
-        //this.setColor(cc.color(100, 100, 100, 0));
         this.m_gameOverLabel = new cc.LabelTTF("没有地方放了", "Arial", this.m_gameOverLFontS);
         this.m_gameOverLabel.attr({
             x : size.width / 2,

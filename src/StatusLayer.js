@@ -1,6 +1,10 @@
 /**
  * Created by LuoXiang on 2016/3/17.
  */
+
+/*
+* 状态层，显示状态信息
+* */
 var StatusLayer = cc.Layer.extend({
     m_scoreLabel : null,
     m_highestScoreLabel : null,

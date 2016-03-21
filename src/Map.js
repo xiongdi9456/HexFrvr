@@ -2,6 +2,9 @@
  * Created by LuoXiang on 2016/3/7.
  */
 
+/*
+* 地图类，保存地图数据
+* */
 var Map = cc.Class.extend({
     m_mapA : null,
     ctor : function(){
