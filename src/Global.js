@@ -16,11 +16,11 @@ gSpace = 3.5;
 gBSpace = 2;
 //放下一个方块的分值
 gScoreBase = 40;
-gScoreLabelSpace = 40;
-gScoreLabelFontSize = 50;
-gHighestLSpaceY = 40;
+gScoreLabelSpace = 20;
+gScoreLabelFontSize = 40;
+gHighestLSpaceY = 30;
 gHighestLSpaceX = 100;
-gHighestLFontSize = 40;
+gHighestLFontSize = 30;
 //地图标记
 if(typeof gMapTag == "undefined"){
     //创建一个普通对象
