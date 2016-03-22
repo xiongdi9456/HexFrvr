@@ -26,6 +26,8 @@ var GameScene = cc.Scene.extend({
     m_putDownScore : 0,
     m_putDownCount : 0,
     m_showScoreLFSize : 40,
+    //显示分数的Label的数量
+    m_showScoreLabels : 1,
     onEnter : function(){
         this._super();
 
@@ -35,6 +37,12 @@ var GameScene = cc.Scene.extend({
         this.addChild(this.m_mapLayer);
         this.addChild(this.m_blockSLayer);
         this.addChild(this.m_statusLayer);
+        //默认只有一个，m_showScoreLabels[0],只显示放下一个方块时获得的分数
+        this.m_showScoreLabels = new Array();
+        var showScoreLabel0 = new cc.LabelTTF("", "", this.m_showScoreLFSize);
+        this.addChild(showScoreLabel0);
+        showScoreLabel0.setVisible(false);
+        this.m_showScoreLabels.push(showScoreLabel0);
         //如果找不到反回值为0，cc.sys.localStorage.getItem()
         var highScore = cc.sys.localStorage.getItem(gHighScoreKey);
         //初始化存储最高纪录
@@ -393,7 +401,7 @@ var GameScene = cc.Scene.extend({
                 var posT = this.m_mapLayer.m_blocks[this.m_mapBlockLineI][this.m_mapBlockRowI].getPosition();
                 //显示得分
                 var color = cc.color(255, 255, 255);
-                this.showScoreLabel(posT, this.m_putDownScore, color);
+                this.showScoreLabel(posT, this.m_putDownScore, color, 0);
                 //在放下方块后才需要进行消行判断
                 this.dealWithFullLine();
                 //更新分数
@@ -580,7 +588,7 @@ var GameScene = cc.Scene.extend({
                     posT = cc.p(firstP.x + (secondP.x - firstP.x) / 2, firstP.y);
                 }
                 var color = cc.color(139, 69, 19);
-                this.showScoreLabel(posT, itCleanScore, color);
+                this.showScoreLabel(posT, itCleanScore, color, currentCleanCount);
             }
             if(cleanRowP[i].m_isFull){
                 var originalLineI = cleanRowP[i].m_lineI;
@@ -630,7 +638,7 @@ var GameScene = cc.Scene.extend({
                     posT = cc.p(secondP.x + (firstP.x - secondP.x) / 2, secondP.y + (firstP.y - secondP.y) / 2);
                 }
                 var color = cc.color(0, 139, 0);
-                this.showScoreLabel(posT, itCleanScore, color);
+                this.showScoreLabel(posT, itCleanScore, color, currentCleanCount);
             }
             if(cleanContraryRowP[i].m_isFull){
                 var originalLineI = cleanContraryRowP[i].m_lineI;
@@ -680,7 +688,7 @@ var GameScene = cc.Scene.extend({
                     posT = cc.p(firstP.x + (secondP.x - firstP.x) / 2, secondP.y + (firstP.y - secondP.y) / 2);
                 }
                 var color = cc.color(25, 25, 112);
-                this.showScoreLabel(posT, itCleanScore, color);
+                this.showScoreLabel(posT, itCleanScore, color, currentCleanCount);
             }
         }
     },
@@ -710,21 +718,31 @@ var GameScene = cc.Scene.extend({
     /*
     * 每次放下或者行满时，显示获得的分数
     * */
-    showScoreLabel : function(pos, score, color){
-        var showScoreLabel = new cc.LabelTTF("", "Arial", this.m_showScoreLFSize);
-        this.addChild(showScoreLabel);
-        showScoreLabel.setColor(color);
-        showScoreLabel.setString("" + score);
-        showScoreLabel.setPosition(cc.p(pos.x, pos.y));
-        //var fadeIn = cc.fadeIn(0.1);
-        var fadeOut = cc.fadeOut(0.3);
-        var moveTo = cc.moveTo(0.3, showScoreLabel.getPositionX(), showScoreLabel.getPositionY() + 40);
-        var moveAndFadeOut = cc.spawn(fadeOut, moveTo);
+    showScoreLabel : function(pos, score, color, currentCleanCount){
+        //动态更新showLabel的数量
+        //因为m_showScoreLabels.length[0],不供消行显示分数使用
+        if(currentCleanCount > this.m_showScoreLabels.length - 1){
+            var showScoreLabelT = new cc.LabelTTF("", "", this.m_showScoreLFSize);
+            this.addChild(showScoreLabelT);
+            this.m_showScoreLabels.push(showScoreLabelT);
+        }
+        else{
+            this.m_showScoreLabels[currentCleanCount].setVisible(true);
+        }
+        this.m_showScoreLabels[currentCleanCount].setColor(color);
+        this.m_showScoreLabels[currentCleanCount].setString("" + score);
+        this.m_showScoreLabels[currentCleanCount].setPosition(cc.p(pos.x, pos.y));
+        //fadeOut会导致精灵无法显示，此时设置visible没有效果
+        //var fadeOut = cc.fadeOut(0.3);
+        var moveToA = cc.moveTo(0.3, this.m_showScoreLabels[currentCleanCount].getPositionX(),
+            this.m_showScoreLabels[currentCleanCount].getPositionY() + 40);
+        //var moveAndFadeOut = cc.spawn(moveToA, fadeOut);
         //回调函数传参,是在函数参数里面，注意别写错
-        var showAction = cc.sequence(cc.delayTime(0.2), moveAndFadeOut, cc.callFunc(function(){
-            this.removeFromParent();
-        }, showScoreLabel));
-        showScoreLabel.runAction(showAction);
+        var showAction = cc.sequence(cc.delayTime(0.2), moveToA, cc.callFunc(function(){
+            this.setVisible(false);
+        },this.m_showScoreLabels[currentCleanCount]));
+        this.m_showScoreLabels[currentCleanCount].stopAllActions();
+        this.m_showScoreLabels[currentCleanCount].runAction(showAction);
     },
 
     /*
