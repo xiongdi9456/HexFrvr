@@ -19,7 +19,7 @@ gScoreBase = 40;
 gScoreLabelSpace = 20;
 gScoreLabelFontSize = 40;
 gHighestLSpaceY = 30;
-gHighestLSpaceX = 100;
+gHighestLSpaceX = 200;
 gHighestLFontSize = 30;
 //地图标记
 if(typeof gMapTag == "undefined"){
@@ -31,4 +31,4 @@ if(typeof gMapTag == "undefined"){
 
 gOpacityShape = 255;
 gOpacityMap = 255;
-
+gHighScoreKey = "HighScore";

@@ -35,6 +35,11 @@ var GameScene = cc.Scene.extend({
         this.addChild(this.m_mapLayer);
         this.addChild(this.m_blockSLayer);
         this.addChild(this.m_statusLayer);
+        //如果找不到反回值为0，cc.sys.localStorage.getItem()
+        var highScore = cc.sys.localStorage.getItem(gHighScoreKey);
+        //初始化存储最高纪录
+        cc.sys.localStorage.setItem(gHighScoreKey, highScore);
+
         var self = this;
         this.m_blockTouchListener = cc.EventListener.create({
             event : cc.EventListener.TOUCH_ONE_BY_ONE,
@@ -210,7 +215,6 @@ var GameScene = cc.Scene.extend({
                     }
                 }
             }
-            cc.log("k is: " + k);
         }
         this.m_isGameOver = true;
         return false;
@@ -382,7 +386,6 @@ var GameScene = cc.Scene.extend({
                 this.m_blockSLayer.m_currentBS[3].runAction(this.m_blockSLayer.m_action.clone());
                 cc.eventManager.addListener(this.m_blockTouchListener.clone(), this.m_blockSLayer.m_currentBS[3]);
 
-                cc.log("put down ok");
                 //更新放下方块数
                 ++this.m_putDownCount;
                 //记录得分
@@ -751,6 +754,10 @@ var GameScene = cc.Scene.extend({
         }
 
         this.m_statusLayer.m_lastTimeS = this.m_score;
+        var highScore = parseFloat(cc.sys.localStorage.getItem(gHighScoreKey));
+        if(this.m_score > highScore){
+            cc.sys.localStorage.setItem(gHighScoreKey, this.m_score);
+        }
         this.m_score = 0;
         this.m_cleanCount = 0;
         this.m_putDownCount = 0;

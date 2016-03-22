@@ -33,7 +33,8 @@ var StatusLayer = cc.Layer.extend({
         this.m_scoreLabel.setAnchorPoint(cc.p(0.5, 0.5));
         this.addChild(this.m_scoreLabel);
 
-        this.m_highestScoreLabel = new cc.LabelTTF("最高分: 0", "Arial", gHighestLFontSize);
+        var highScore = cc.sys.localStorage.getItem(gHighScoreKey);
+        this.m_highestScoreLabel = new cc.LabelTTF("最高分: " + highScore, "Arial", gHighestLFontSize);
         this.m_highestScoreLabel.attr({
             x : size.width - gHighestLSpaceX,
             y : size.height - gHighestLSpaceY,
@@ -53,6 +54,10 @@ var StatusLayer = cc.Layer.extend({
                 this.m_addScoreStep = Math.floor(this.m_lastTimeS / 40);
                 this.m_scoreLabel.setScale(1.0);
                 this.m_flag = true;
+
+                //更新最高分
+                var highScore = cc.sys.localStorage.getItem(gHighScoreKey);
+                this.m_highestScoreLabel.setString("最高分 " + highScore);
             }
             this.m_currentS -= this.m_addScoreStep;
             if(this.m_currentS <= 0){
