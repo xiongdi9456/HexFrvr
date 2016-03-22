@@ -4,6 +4,9 @@ var res = {
     CloseSelected_png : "res/CloseSelected.png",
     block_png : "res/block.png",
     shadow_png : "res/shadow.png",
+    game_over_bg_png : "res/GameObg.png",
+    start_n_png : "res/start_n.png",
+    start_s_png : "res/start_s.png",
     tuffy_fonts_plist : "res/Fonts/tuffy_bold_italic-charmap.plist",
     tuffy_fonts_png : "res/Fonts/tuffy_bold_italic-charmap.png"
 };

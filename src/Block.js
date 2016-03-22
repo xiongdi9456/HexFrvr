@@ -76,6 +76,9 @@ var Block = cc.Node.extend({
     * 添加遮罩精灵，传入精灵对象及其透明度
     * */
     addShadowSprite : function(sprite, opacity){
+        if(null != this.m_shadowSprite){
+            return;
+        }
         var cSize = this.getContentSize();
         sprite.setPosition(cc.p(cSize.width / 2, cSize.height / 2));
         sprite.setOpacity(opacity);

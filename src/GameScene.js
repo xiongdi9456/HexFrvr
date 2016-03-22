@@ -11,6 +11,7 @@ var GameScene = cc.Scene.extend({
     m_mapLayer : null,
     m_blockSLayer : null,
     m_statusLayer : null,
+    m_gameOverLayer : null,
     m_isBeginListen : false,
     m_isTouchEnd : false,
     m_isMoved : false,
@@ -535,9 +536,7 @@ var GameScene = cc.Scene.extend({
                 //先统一设置其颜色，然后在顺序执行消除动作
                 for(var j = 0; j < cleanLineP[i].m_length; ++j){
                     //这里+j的实现效果与下面 ++originalRowI效果相同
-                    var shadowS = new cc.Sprite(res.shadow_png);
                     mapBs[originalLineI][originalRowI + j].setSpriteColor(cc.color(255, 255, 255));
-                    mapBs[originalLineI][originalRowI + j].addShadowSprite(shadowS, gOpacityMap);
                 }
                 for(var j = 0; j < cleanLineP[i].m_length; ++j){
                     var delayTF = 0.001;
@@ -548,9 +547,6 @@ var GameScene = cc.Scene.extend({
                     var delayT = cc.delayTime(actionTime * j + delayTF * (cleanContraryRowP[i].m_length - j));
                     var mapColor = this.m_mapLayer.m_mapColor;
                     var cleanAction = cc.sequence(delayT, fadeOutA, new cc.CallFunc(function(){
-                        //移除遮罩
-                        this.m_shadowSprite.removeFromParent();
-                        this.m_shadowSprite = null;
                         this.setSpriteColor(mapColor);
                     }, mapBs[originalLineI][originalRowI], mapColor));
                     cleanAction.setTag(1);
@@ -588,9 +584,7 @@ var GameScene = cc.Scene.extend({
                 var originalRowI = cleanRowP[i].m_rowI;
                 //先统一设置其颜色和遮罩，然后在顺序执行消除动作
                 for(var j = 0; j < cleanLineP[i].m_length; ++j){
-                    var shadowS = new cc.Sprite(res.shadow_png);
                     mapBs[originalLineI + j][originalRowI].setSpriteColor(cc.color(255, 255, 255));
-                    mapBs[originalLineI + j][originalRowI].addShadowSprite(shadowS, gOpacityMap);
                 }
                 for(var j = 0; j < cleanRowP[i].m_length; ++j){
                     //循环的延迟时间
@@ -603,9 +597,6 @@ var GameScene = cc.Scene.extend({
                     var delayT = cc.delayTime(actionTime * j + delayTF * (cleanContraryRowP[i].m_length - j));
                     var mapColor = this.m_mapLayer.m_mapColor;
                     var cleanAction = cc.sequence(delayT, fadeOutA, new cc.CallFunc(function(){
-                        //移除遮罩
-                        this.m_shadowSprite.removeFromParent();
-                        this.m_shadowSprite = null;
                         this.setSpriteColor(mapColor);
                     }, mapBs[originalLineI][originalRowI], mapColor));
                     cleanAction.setTag(1);
@@ -643,9 +634,7 @@ var GameScene = cc.Scene.extend({
                 var originalRowI = cleanContraryRowP[i].m_rowI;
                 //先统一设置其颜色，然后在顺序执行消除动作
                 for(var j = 0; j < cleanLineP[i].m_length; ++j){
-                    var shadowS = new cc.Sprite(res.shadow_png);
                     mapBs[originalLineI + j][originalRowI + j].setSpriteColor(cc.color(255, 255, 255));
-                    mapBs[originalLineI + j][originalRowI + j].addShadowSprite(shadowS, gOpacityMap);
                 }
                 for(var j = 0; j < cleanContraryRowP[i].m_length; ++j){
                     //循环的延迟时间
@@ -657,9 +646,6 @@ var GameScene = cc.Scene.extend({
                     //动作的延迟时间
                     var delayT = cc.delayTime(actionTime * j + delayTF * (cleanContraryRowP[i].m_length - j));
                     var cleanAction = cc.sequence(delayT, fadeOutA,  new cc.CallFunc(function(){
-                        //移除遮罩
-                        this.m_shadowSprite.removeFromParent();
-                        this.m_shadowSprite = null;
                         this.setSpriteColor(mapColor);
                     }, mapBs[originalLineI][originalRowI], mapColor));
                     cleanAction.setTag(1);
@@ -712,8 +698,8 @@ var GameScene = cc.Scene.extend({
     * */
     gameOver : function(){
         if(this.m_isGameOver){
-            var gameLayer = new GameOverLayer();
-            this.addChild(gameLayer);
+            this.m_gameOverLayer = new GameOverLayer();
+            this.addChild(this.m_gameOverLayer);
             this.m_isGameOver = false;
         }
     },
@@ -728,13 +714,48 @@ var GameScene = cc.Scene.extend({
         showScoreLabel.setString("" + score);
         showScoreLabel.setPosition(cc.p(pos.x, pos.y));
         //var fadeIn = cc.fadeIn(0.1);
-        var fadeOut = cc.fadeOut(0.2);
-        var moveTo = cc.moveTo(0.2, showScoreLabel.getPositionX(), showScoreLabel.getPositionY() + 40);
+        var fadeOut = cc.fadeOut(0.3);
+        var moveTo = cc.moveTo(0.3, showScoreLabel.getPositionX(), showScoreLabel.getPositionY() + 40);
         var moveAndFadeOut = cc.spawn(fadeOut, moveTo);
         //回调函数传参,是在函数参数里面，注意别写错
-        var showAction = cc.sequence(cc.delayTime(0.5), moveAndFadeOut, cc.callFunc(function(){
+        var showAction = cc.sequence(cc.delayTime(0.2), moveAndFadeOut, cc.callFunc(function(){
             this.removeFromParent();
         }, showScoreLabel));
         showScoreLabel.runAction(showAction);
+    },
+
+    /*
+    * 重新游戏前的清理
+    * */
+    cleanForReTry : function(){
+        var mapBs = this.m_mapLayer.m_blocks;
+        var mapV = this.m_mapLayer.m_map.m_mapA;
+        for(var i = 0; i < gMapLineM; ++i){
+            // 计算每一行的元素的个数(六边形蜂窝地图)
+            var lineLength = gMapLineM - Math.abs(4 - i);
+            var j = 0;
+            if(i > 4){
+                j = i - 4;
+            }
+            //j的初始值
+            var originJ = j;
+            //j的最大值+1
+            var rowMax = originJ + lineLength;
+            var mapColor = this.m_mapLayer.m_mapColor;
+            for(j; j < rowMax; ++j){
+               if(gMapTag.fill == mapV[i][j]){
+                   mapBs[i][j].setSpriteColor(mapColor);
+                   mapV[i][j] = gMapTag.empty;
+               }
+            }
+        }
+
+        this.m_statusLayer.m_lastTimeS = this.m_score;
+        this.m_score = 0;
+        this.m_cleanCount = 0;
+        this.m_putDownCount = 0;
+
+        cc.eventManager.removeListener(this.m_gameOverLayer.m_listenter);
+        this.m_gameOverLayer.removeFromParent();
     }
 });

@@ -29,6 +29,6 @@ if(typeof gMapTag == "undefined"){
     gMapTag.fill = 1;
 }
 
-gOpacityShape = 90;
-gOpacityMap = 40;
+gOpacityShape = 255;
+gOpacityMap = 255;
 
