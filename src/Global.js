@@ -21,6 +21,7 @@ gScoreLabelFontSize = 40;
 gHighestLSpaceY = 30;
 gHighestLSpaceX = 200;
 gHighestLFontSize = 30;
+gDoWellLFontSize = 40;
 //地图标记
 if(typeof gMapTag == "undefined"){
     //创建一个普通对象
@@ -29,6 +30,6 @@ if(typeof gMapTag == "undefined"){
     gMapTag.fill = 1;
 }
 
-gOpacityShape = 255;
+gOpacityShape = 70;
 gOpacityMap = 255;
 gHighScoreKey = "HighScore";

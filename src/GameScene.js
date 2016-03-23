@@ -19,15 +19,20 @@ var GameScene = cc.Scene.extend({
     m_mapBlockLineI : undefined,
     m_mapBlockRowI : undefined,
     m_blockTouchListener : null,
+    //阴影精灵
+    m_shadows : null,
 
     m_score : 0,
     m_cleanScore : 0,
     m_cleanCount : 0,
+    m_cleanCountOnce : 0,
     m_putDownScore : 0,
     m_putDownCount : 0,
     m_showScoreLFSize : 40,
     //显示分数的Label的数量
     m_showScoreLabels : 1,
+    //是否显示DoWell语句
+    m_showDoWellLevel : 0,
     onEnter : function(){
         this._super();
 
@@ -37,12 +42,20 @@ var GameScene = cc.Scene.extend({
         this.addChild(this.m_mapLayer);
         this.addChild(this.m_blockSLayer);
         this.addChild(this.m_statusLayer);
+
+        this.m_shadows = new Array(4);
+        this.m_shadows[0] = new cc.Sprite(res.shadow_png);
+        this.m_shadows[1] = new cc.Sprite(res.shadow_png);
+        this.m_shadows[2] = new cc.Sprite(res.shadow_png);
+        this.m_shadows[3] = new cc.Sprite(res.shadow_png);
+
         //默认只有一个，m_showScoreLabels[0],只显示放下一个方块时获得的分数
         this.m_showScoreLabels = new Array();
         var showScoreLabel0 = new cc.LabelTTF("", "", this.m_showScoreLFSize);
         this.addChild(showScoreLabel0);
         showScoreLabel0.setVisible(false);
         this.m_showScoreLabels.push(showScoreLabel0);
+
         //如果找不到反回值为0，cc.sys.localStorage.getItem()
         var highScore = cc.sys.localStorage.getItem(gHighScoreKey);
         //初始化存储最高纪录
@@ -143,30 +156,26 @@ var GameScene = cc.Scene.extend({
                         mapV[blockLineI3][blockRowI3] == gMapTag.empty &&
                         mapV[blockLineI4][blockRowI4] == gMapTag.empty;
                     if(bConditoion){
-                        //如果之前已经填充，然后现在又满足条件，可以填充了，应为putDown函数在
+                        //如果之前已经填充，然后现在又满足条件，可以填充了，因为putDown函数在
                         //cleanPutDown函数前，这里会把前次记录的i,j覆盖，导致之前的临时填充的方块失去监控
                         if(this.m_mapBlockLineI != undefined && this.m_mapBlockRowI != undefined){
-                            //this.cleanPutDown(this.m_target);
                             this.directCleanPutDown(target);
                         }
                         mapBs[blockLineI1][blockRowI1].setSpriteColor(target.m_color);
                         mapBs[blockLineI2][blockRowI2].setSpriteColor(target.m_color);
                         mapBs[blockLineI3][blockRowI3].setSpriteColor(target.m_color);
                         mapBs[blockLineI4][blockRowI4].setSpriteColor(target.m_color);
-                        var shadowS1 = new cc.Sprite(res.shadow_png);
-                        var shadowS2 = new cc.Sprite(res.shadow_png);
-                        var shadowS3 = new cc.Sprite(res.shadow_png);
-                        var shadowS4 = new cc.Sprite(res.shadow_png);
+
                         //当为方块形状1时，只有一个方块，其他方块被没有使用。
                         if(1 == target.m_shapeTag)
                         {
-                            mapBs[blockLineI1][blockRowI1].addShadowSprite(shadowS1, gOpacityShape);
+                            mapBs[blockLineI1][blockRowI1].addShadowSprite(this.m_shadows[0], gOpacityShape);
                         }
                         else{
-                            mapBs[blockLineI1][blockRowI1].addShadowSprite(shadowS1, gOpacityShape);
-                            mapBs[blockLineI2][blockRowI2].addShadowSprite(shadowS2, gOpacityShape);
-                            mapBs[blockLineI3][blockRowI3].addShadowSprite(shadowS3, gOpacityShape);
-                            mapBs[blockLineI4][blockRowI4].addShadowSprite(shadowS4, gOpacityShape);
+                            mapBs[blockLineI1][blockRowI1].addShadowSprite(this.m_shadows[0], gOpacityShape);
+                            mapBs[blockLineI2][blockRowI2].addShadowSprite(this.m_shadows[1], gOpacityShape);
+                            mapBs[blockLineI3][blockRowI3].addShadowSprite(this.m_shadows[2], gOpacityShape);
+                            mapBs[blockLineI4][blockRowI4].addShadowSprite(this.m_shadows[3], gOpacityShape);
                         }
                         mapV[blockLineI1][blockRowI1] = gMapTag.fill;
                         mapV[blockLineI2][blockRowI2] = gMapTag.fill;
@@ -229,7 +238,7 @@ var GameScene = cc.Scene.extend({
     },
 
     /*
-    * 清除放下的方块，在没有TouchEnded之前
+    * 清除放下的方块，在没有TouchEnded之前,用于投影的移除
     * */
     cleanPutDown : function(target){
         if(this.m_mapBlockLineI == undefined || this.m_mapBlockRowI == undefined){
@@ -281,7 +290,7 @@ var GameScene = cc.Scene.extend({
     },
 
     /*
-    * 直接清除放下的方块，不进行条件判断，请不要调用此方法
+    * 直接清除放下的方块，不进行条件判断，用于确定放下时，投影方块的移除，请不要调用此方法
     * */
     directCleanPutDown : function(target){
         var mapBs = this.m_mapLayer.m_blocks;
@@ -445,6 +454,8 @@ var GameScene = cc.Scene.extend({
     * 然后统一消除记录的满行单位
     * */
     dealWithFullLine : function(){
+        //在开始满行处理之前，应把本次消行数初始化为0
+        this.m_cleanCountOnce = 0;
         var cleanLineP = new Array(9);
         for(var i = 0; i < cleanLineP.length; ++i){
             cleanLineP[i] = new FullFlagPoint();
@@ -691,6 +702,9 @@ var GameScene = cc.Scene.extend({
                 this.showScoreLabel(posT, itCleanScore, color, currentCleanCount);
             }
         }
+        this.m_cleanCountOnce = currentCleanCount;
+        //当进行完消行判断时，显示doWell语句
+        this.m_showDoWellLevel = true;
     },
 
     /*
@@ -732,7 +746,9 @@ var GameScene = cc.Scene.extend({
         this.m_showScoreLabels[currentCleanCount].setColor(color);
         this.m_showScoreLabels[currentCleanCount].setString("" + score);
         this.m_showScoreLabels[currentCleanCount].setPosition(cc.p(pos.x, pos.y));
-        //fadeOut会导致精灵无法显示，此时设置visible没有效果
+        //fadeOut会导致精灵无法显示，此时设置visible没有效果,并不是这样，
+        //淡出一个对象（遵循cc.RGBAProtocol协议）。透明度从255变化到0。 "reverse"动作是FadeIn
+        //也就是它完全变为透明了，所以看不到。
         //var fadeOut = cc.fadeOut(0.3);
         var moveToA = cc.moveTo(0.3, this.m_showScoreLabels[currentCleanCount].getPositionX(),
             this.m_showScoreLabels[currentCleanCount].getPositionY() + 40);

@@ -14,6 +14,8 @@ var StatusLayer = cc.Layer.extend({
     m_isChangeS : false,
     m_scoreLabelScale : 0.7,
     m_flag : false,
+    m_doWellSprites : 0,
+    m_doWellSprite : null,
     ctor : function(){
         this._super();
         this.init();
@@ -42,10 +44,27 @@ var StatusLayer = cc.Layer.extend({
         this.m_highestScoreLabel.setAnchorPoint(cc.p(0.5, 0.5));
         this.addChild(this.m_highestScoreLabel);
 
+        this.m_doWellSprites = new Array(4);
+        this.m_doWellSprites[0] = new cc.Sprite(res.jixunvli_png);
+        this.m_doWellSprites[1] = new cc.Sprite(res.welldone_png);
+        this.m_doWellSprites[2] = new cc.Sprite(res.ku_png);
+        this.m_doWellSprites[3] = new cc.Sprite(res.waixingren_png);
+        for(var i = 0; i < this.m_doWellSprites.length; ++i){
+            this.m_doWellSprites[i].setPosition(cc.p(size.width / 2, size.height / 4));
+        }
+
         this.scheduleUpdate();
     },
 
     update : function(){
+        this.showScore();
+        this.showDoWellLevel();
+    },
+
+    /*
+    * 更新分数的显示，当前得分，以及最高分
+    * */
+    showScore : function(){
         //当重新游戏时，分数回退为0的效果
         if(this.m_lastTimeS){
             //第一次执行
@@ -87,5 +106,70 @@ var StatusLayer = cc.Layer.extend({
             this.m_isChangeS = true;
         }
         this.m_scoreLabel.setString("" + this.m_currentS);
+    },
+
+    /*
+    * 随着玩家消除函数的不同，显示相应的称赞话语
+    * */
+    showDoWellLevel : function(){
+        if(!this.getParent().m_showDoWellLevel){
+            return;
+        }
+        var size = cc.winSize;
+        var cleanCountOnce = this.getParent().m_cleanCountOnce;
+
+        var fadeInA = new cc.fadeIn(0.5);
+        var moveToInA = new cc.moveTo(0.5, size.width / 2, size.height / 2);
+        var fadeOutA = fadeInA.reverse();
+        var moveToOutA = new cc.moveTo(0.5, size.width / 2, size.height / 4 * 3);
+        var moveAndFadeInA = cc.spawn(fadeInA, moveToInA);
+        var moveAndFadeOutA = cc.spawn(fadeOutA, moveToOutA);
+        switch(cleanCountOnce){
+            case 0:
+            case 1:break;
+            case 2:
+            {
+                var moveAndFadeA = cc.sequence(moveAndFadeInA.clone(), moveAndFadeOutA.clone(),
+                new cc.CallFunc(function(){
+                    this.setPosition(cc.p(size.width / 2, size.height / 4));
+                    this.removeFromParent();
+                },this.m_doWellSprites[0]));
+                this.addChild(this.m_doWellSprites[0]);
+                this.m_doWellSprites[0].runAction(moveAndFadeA);
+            }break;
+            case 3:
+            {
+                var moveAndFadeA = cc.sequence(moveAndFadeInA.clone(), moveAndFadeOutA.clone(),
+                    new cc.CallFunc(function(){
+                        this.setPosition(cc.p(size.width / 2, size.height / 4));
+                        this.removeFromParent();
+                    },this.m_doWellSprites[1]));
+                this.addChild(this.m_doWellSprites[1]);
+                this.m_doWellSprites[1].runAction(moveAndFadeA)
+            }break;
+            case 4:
+            {
+                var moveAndFadeA = cc.sequence(moveAndFadeInA.clone(), moveAndFadeOutA.clone(),
+                    new cc.CallFunc(function(){
+                        this.setPosition(cc.p(size.width / 2, size.height / 4));
+                        this.removeFromParent();
+                    },this.m_doWellSprites[2]));
+                this.addChild(this.m_doWellSprites[2]);
+                this.m_doWellSprites[2].runAction(moveAndFadeA)
+            }break;
+            default:
+            {
+                var moveAndFadeA = cc.sequence(moveAndFadeInA.clone(), moveAndFadeOutA.clone(),
+                    new cc.CallFunc(function(){
+                        this.setPosition(cc.p(size.width / 2, size.height / 4));
+                        this.removeFromParent();
+                    },this.m_doWellSprites[3]));
+                this.addChild(this.m_doWellSprites[3]);
+                this.m_doWellSprites[3].runAction(moveAndFadeA)
+            }
+        }
+        //完成显示后重置为false，只有当再次完成消行判断后才再次执行,避免
+        //二次调用，导致child already added. It can't be added again Error
+        this.getParent().m_showDoWellLevel = false;
     }
 });
