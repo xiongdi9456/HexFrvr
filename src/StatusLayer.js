@@ -30,16 +30,20 @@ var StatusLayer = cc.Layer.extend({
         this.m_scoreLabel.setScale(this.m_scoreLabelScale);
         this.m_scoreLabel.attr({
             x : size.width / 2,
-            y : size.height - gScoreLabelSpace,
+            y : size.height - gScoreLabelSpace
         });
         this.m_scoreLabel.setAnchorPoint(cc.p(0.5, 0.5));
         this.addChild(this.m_scoreLabel);
 
         var highScore = cc.sys.localStorage.getItem(gHighScoreKey);
+        if(null == highScore){
+            highScore = 0;
+        }
         this.m_highestScoreLabel = new cc.LabelTTF("最高分: " + highScore, "Arial", gHighestLFontSize);
+        var highLS = this.m_highestScoreLabel.getContentSize();
         this.m_highestScoreLabel.attr({
-            x : size.width - gHighestLSpaceX,
-            y : size.height - gHighestLSpaceY,
+                x : size.width - highLS.width / 2,
+                y : size.height - gHighestLSpaceY
         });
         this.m_highestScoreLabel.setAnchorPoint(cc.p(0.5, 0.5));
         this.addChild(this.m_highestScoreLabel);
@@ -77,6 +81,9 @@ var StatusLayer = cc.Layer.extend({
                 //更新最高分
                 var highScore = cc.sys.localStorage.getItem(gHighScoreKey);
                 this.m_highestScoreLabel.setString("最高分 " + highScore);
+                var size = cc.winSize;
+                var highLS = this.m_highestScoreLabel.getContentSize();
+                this.m_highestScoreLabel.setPosition(cc.p(size.width - highLS.width / 2, size.height - gHighestLSpaceY));
             }
             this.m_currentS -= this.m_addScoreStep;
             if(this.m_currentS <= 0){

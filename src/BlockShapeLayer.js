@@ -18,6 +18,7 @@ var BlockShapeLayer = cc.Layer.extend({
     init : function(){
         this._super;
         var size = cc.winSize;
+        var vSize = cc.director.getVisibleSize();
 
         //彩虹七色r,g,b
         this.m_colors.push(cc.color(255, 0, 0));
@@ -42,15 +43,15 @@ var BlockShapeLayer = cc.Layer.extend({
         var ySpace = (size.height - 8 * disY) / 2;
         var xSpace = (size.width - 8 * disOneLineX) / 2;
 
-        if(size.width < size.height){
-            this.m_currentBS[1].setOriginalPos(cc.p(size.width / 2, 20));
-            this.m_currentBS[0].setOriginalPos(cc.p((size.width / 2 - gSpriteW * 4), 20));
-            this.m_currentBS[2].setOriginalPos(cc.p((size.width / 2 + gSpriteW * 4), 20));
+        if(vSize.width < vSize.height){
+            this.m_currentBS[1].setOriginalPos(cc.p(size.width / 2, ySpace / 2));
+            this.m_currentBS[0].setOriginalPos(cc.p((size.width / 2 - gSpriteW * 3), ySpace / 2));
+            this.m_currentBS[2].setOriginalPos(cc.p((size.width / 2 + gSpriteW * 3), ySpace / 2));
         }
         else{
-            this.m_currentBS[1].setOriginalPos(cc.p(size.width - 3 * gSpriteW, size.height / 2));
-            this.m_currentBS[2].setOriginalPos(cc.p(size.width - 3 * gSpriteW, (size.height / 2 - gSpriteH * 3)));
-            this.m_currentBS[0].setOriginalPos(cc.p(size.width - 3 * gSpriteW, (size.height / 2 + gSpriteH * 3)));
+            this.m_currentBS[1].setOriginalPos(cc.p(size.width - xSpace / 2, size.height / 2));
+            this.m_currentBS[2].setOriginalPos(cc.p(size.width - xSpace / 2, (size.height / 2 - gSpriteH * 3)));
+            this.m_currentBS[0].setOriginalPos(cc.p(size.width - xSpace / 2, (size.height / 2 + gSpriteH * 3)));
         }
 
         for(var i = 0; i < 4; ++i){

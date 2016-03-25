@@ -56,7 +56,14 @@ cc.game.onStart = function(){
     // Adjust viewport meta
     cc.view.adjustViewPort(true);
     // Setup the resolution policy and design resolution size
-    cc.view.setDesignResolutionSize(800, 450, cc.ResolutionPolicy.SHOW_ALL);
+    cc.view.setDesignResolutionSize(650, 630, cc.ResolutionPolicy.FIXED_HEIGHT);
+    var vSize = cc.director.getVisibleSize();
+    if(vSize.width > vSize.height){
+        cc.view.setDesignResolutionSize(650, 630, cc.ResolutionPolicy.FIXED_HEIGHT);
+    }
+    else{
+        cc.view.setDesignResolutionSize(650, 630, cc.ResolutionPolicy.FIXED_WIDTH);
+    }
     // The game will be resized when browser size change
     cc.view.resizeWithBrowserSize(true);
     //load resources
